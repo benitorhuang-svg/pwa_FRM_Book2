@@ -1,0 +1,41 @@
+# 1. 觸發條件 (什麼時候執行？)
+on:
+  push:
+    branches: [master] # 當有程式碼被 push 到 master 分支時
+  workflow_dispatch: # 或者是手動點擊按鈕觸發
+
+# 2. 權限設定 (允許機器人做什麼？)
+permissions:
+  contents: write # 允許機器人寫入儲存庫 (因為它需要建立並推送 gh-pages 分支)
+
+# 3. 工作流程 (要做什麼？)
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest # 指定在最新的 Linux 環境中執行
+    steps:
+      # Step 1: 下載程式碼
+      - name: Checkout
+        uses: actions/checkout@v4 # 使用官方工具把你的 master 分支程式碼抓下來
+
+      # Step 2: 安裝 Node.js 環境
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm" # 開啟快取，讓下次安裝更快
+
+      # Step 3: 安裝專案依賴 (就像你在電腦上輸入 npm install)
+      - name: Install dependencies
+        run: npm ci # 'ci' 是 Clean Install，比 install 更快更嚴謹
+
+      # Step 4: 建置網站 (就像你在電腦上輸入 npm run build)
+      - name: Build
+        run: npm run build
+        # 這一步會產生一個 'dist' 資料夾，裡面裝著編譯好的靜態網站檔案
+
+      # Step 5: 自動部署 (最關鍵的一步！)
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3 # 使用別人寫好的好用工具
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # 使用 GitHub 提供的臨時密碼
+          publish_dir: ./dist # 把剛剛 Step 4 產生的 'dist' 資料夾內容發布出去
