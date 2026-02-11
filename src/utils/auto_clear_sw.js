@@ -5,7 +5,7 @@ export async function autoClearSWOnce() {
     try {
         if (!('serviceWorker' in navigator)) return;
 
-        const FLAG = 'frm_sw_cleanup_done_v1';
+        const FLAG = 'frm_sw_cleanup_done_v3';
         if (localStorage.getItem(FLAG)) return;
 
         // Only run if the page is controlled by a service worker (likely stale)
@@ -15,12 +15,15 @@ export async function autoClearSWOnce() {
             return;
         }
 
-        console.info('[AUTO-CLEAN] Detected active Service Worker — cleaning caches and storage.');
+        console.warn('[AUTO-CLEAN] STALE SERVICE WORKER DETECTED! Starting emergency cleanup.');
 
         // Unregister service workers
         try {
             const regs = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(regs.map(r => r.unregister().catch(() => { })));
+            await Promise.all(regs.map(r => {
+                console.log('[AUTO-CLEAN] Unregistering:', r.scope);
+                return r.unregister().catch(() => { });
+            }));
             console.info('[AUTO-CLEAN] serviceWorker registrations unregistered.');
         } catch (e) {
             console.warn('[AUTO-CLEAN] Failed to unregister service workers', e);
@@ -30,7 +33,10 @@ export async function autoClearSWOnce() {
         try {
             if ('caches' in window) {
                 const keys = await caches.keys();
-                await Promise.all(keys.map(k => caches.delete(k).catch(() => { })));
+                await Promise.all(keys.map(k => {
+                    console.log('[AUTO-CLEAN] Deleting Cache:', k);
+                    return caches.delete(k).catch(() => { });
+                }));
                 console.info('[AUTO-CLEAN] CacheStorage cleared:', keys);
             }
         } catch (e) {
@@ -45,7 +51,7 @@ export async function autoClearSWOnce() {
                 console.info('[AUTO-CLEAN] IndexedDB databases deleted:', dbs.map(d => d.name));
             } else {
                 // Fallback: attempt to delete common names used by Pyodide/emscripten
-                const candidates = ['pyodide', 'emscripten-archives', 'idb-filesystem', 'file_storage'];
+                const candidates = ['pyodide', 'emscripten-archives', 'idb-filesystem', 'file_storage', 'workbox-precache-v2'];
                 await Promise.all(candidates.map(n => indexedDB.deleteDatabase(n).catch(() => { })));
                 console.info('[AUTO-CLEAN] IndexedDB fallback delete attempted for candidates.');
             }
@@ -53,24 +59,26 @@ export async function autoClearSWOnce() {
             console.warn('[AUTO-CLEAN] Failed to clear IndexedDB', e);
         }
 
-        // Clear local/session storage
+        // Clear local/session storage (except the MUST-HAVE flags if any)
         try {
+            const theme = localStorage.getItem('theme');
             localStorage.clear();
             sessionStorage.clear();
-            console.info('[AUTO-CLEAN] localStorage and sessionStorage cleared.');
+            if (theme) localStorage.setItem('theme', theme);
+            console.info('[AUTO-CLEAN] localStorage and sessionStorage cleared (theme preserved).');
         } catch (e) {
             console.warn('[AUTO-CLEAN] Failed to clear storage', e);
         }
 
         // Mark as done so this only runs once per client
-        try { localStorage.setItem(FLAG, '1'); } catch (e) { }
+        try { localStorage.setItem(FLAG, '1'); } catch { /* ignore */ }
 
         // Optionally reload to ensure fresh assets are fetched
         try {
-            console.info('[AUTO-CLEAN] Reloading page to load fresh assets.');
+            console.error('[AUTO-CLEAN] CLEANUP COMPLETE. FORCING RELOAD FROM SERVER.');
             window.location.reload(true);
         } catch (e) {
-            console.info('[AUTO-CLEAN] Reload skipped.', e);
+            window.location.href = window.location.href; // Double fallback
         }
 
     } catch (err) {

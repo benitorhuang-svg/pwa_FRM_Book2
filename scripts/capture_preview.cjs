@@ -1,3 +1,4 @@
+/* eslint-env node */
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright');
@@ -41,7 +42,7 @@ const { chromium } = require('playwright');
         headers: res.headers(),
         timestamp: Date.now()
       });
-    } catch (e) {
+    } catch {
       // ignore
     }
   });

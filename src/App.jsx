@@ -108,7 +108,24 @@ function App() {
       setChaptersLoading(true)
       const response = await fetch(`${import.meta.env.BASE_URL}data/chapters_${chapterId}.json?t=${Date.now()}`)
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-      const fullData = await response.json()
+
+      // Read the response as text once to avoid "body stream already read" error
+      const rawText = await response.text()
+      let fullData = null
+
+      try {
+        // Try to parse as JSON first
+        fullData = JSON.parse(rawText)
+      } catch (jsonErr) {
+        // Fallback: attempt to recover from common "bad escaped character" issues
+        try {
+          // Heuristic: escape stray backslashes that are not part of a valid JSON escape
+          const sanitized = rawText.replace(/\\(?!["\\\/bfnrtu])/g, "\\\\")
+          fullData = JSON.parse(sanitized)
+        } catch (e) {
+          throw new Error(`Failed to parse chapter data: ${e.message}`)
+        }
+      }
 
       setChapterCache(prev => ({
         ...prev,

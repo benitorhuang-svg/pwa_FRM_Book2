@@ -51,17 +51,30 @@ const ContentPanel = memo(({ chapter, onCodeClick, selectedTopicId, output, isRu
           if (intro.implementation.scenarios) rawMarkdown += `## 💻 應用場景清單\n${intro.implementation.scenarios}\n\n`
         }
 
-        // Detailed Content
-        if (intro.body) {
+        // Detailed Content (from content.body)
+        const bodyContent = chapter.content?.body || intro.body
+        if (bodyContent) {
           rawMarkdown += `\n## 📝 章節重點解說 ( 內容由AI產生，非原書本提供 )\n`
-          if (typeof intro.body === 'string') {
-            rawMarkdown += intro.body
-          } else if (Array.isArray(intro.body)) {
-            rawMarkdown += intro.body.join('\n\n')
-          } else if (typeof intro.body === 'object') {
-            // Order entries logically (e.g., numerically by key if possible)
-            const entries = Object.entries(intro.body)
-            rawMarkdown += entries.map(([_, content]) => content).join('\n\n')
+          if (typeof bodyContent === 'string') {
+            // Attempt to parse stringified JSON (fix for malformed chapter data)
+            let parsedBody = null
+            try {
+              if (bodyContent.trim().startsWith('{')) {
+                parsedBody = JSON.parse(bodyContent)
+              }
+            } catch (e) {
+              // Ignore parse error, treat as regular string
+            }
+
+            if (parsedBody && typeof parsedBody === 'object') {
+              rawMarkdown += Object.values(parsedBody).join('\n\n')
+            } else {
+              rawMarkdown += bodyContent
+            }
+          } else if (Array.isArray(bodyContent)) {
+            rawMarkdown += bodyContent.join('\n\n')
+          } else if (typeof bodyContent === 'object') {
+            rawMarkdown += Object.values(bodyContent).join('\n\n')
           }
         }
       }
@@ -75,7 +88,6 @@ const ContentPanel = memo(({ chapter, onCodeClick, selectedTopicId, output, isRu
       // Pre-process for KaTeX: Ensure proper spacing around math delimiters
       rawMarkdown = rawMarkdown
         .replace(/\s*\$\$\s*/g, '\n$$\n')
-        .replace(/(?<!\$)\$(?!\$)\s*([\s\S]*?)\s*(?<!\$)\$(?!\$)/g, '$$$1$')
 
       let rawHtml = marked.parse(rawMarkdown)
 

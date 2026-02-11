@@ -3,6 +3,18 @@
 
 <head>
   <meta charset="UTF-8" />
+  <script>
+    // Aggressive Service Worker Unregistration
+    // This runs immediately to try and break stale cache cycles
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) {
+          registration.unregister();
+          console.log('[SW-KILLER] Unregistered stale service worker');
+        }
+      }).catch(err => console.error('[SW-KILLER] Failed:', err));
+    }
+  </script>
   <link rel="icon" type="image/jpeg" href="icons/FRM_Python_科學管控財金風險_實戰篇.jpg" />
   <link rel="preload" href="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js" as="script"
     crossorigin="anonymous" />
@@ -17,7 +29,6 @@
   <link rel="apple-touch-icon" href="icons/FRM_Python_科學管控財金風險_實戰篇.jpg" />
   <title>pwa_實戰篇_手術刀般精準的FRM用Python科學管控財金風險</title>
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js" crossorigin="anonymous"></script>
-  <!-- SciPy stub removed: conditional version in python-shims.js handles this correctly -->
 </head>
 
 <body>

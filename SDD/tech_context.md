@@ -57,10 +57,12 @@
 
 ### 2.3 資料流與本地儲存模式
 
-- **內容資料管線 (Content Pipeline)**: 
-  - **源頭**: `public/data/modular/b2_ch{X}/{X.Y}.json` (模組化細碎檔案)。
-  - **建置**: 透過 `scripts/consolidate_all.py` 將所有模組檔案合併。
-  - **產物**: `public/data/chapters.json` (單一靜態大檔)，應用啟動時一次性請求。
+- **資料加載策略 (Data Loading Strategy)**: 
+  - **核心索引**: `public/data/chapters_index.json` (~5KB) 提供基礎導航資訊。
+  - **按需加載 (On-demand)**: 個別章節內容 `public/data/chapters_b2_ch{X}.json` 僅在使用者選取時加載，極大化啟動速度。
+- **數學渲染優化**:
+  - **Delimiters**: 移除前端冗餘的正則替換，完全信賴 `marked-katex-extension` 處理 `$` (Inline) 與 `$$` (Block)。
+  - **Aligned Blocks**: 確保 `aligned` 環境由 `$$` 包裹以實現區塊居中渲染。
 - **使用者狀態**:
   - `Theme`: 儲存於 `localStorage`。
   - `Code modification`: 使用者自定義修改後的代碼暫存於 IndexedDB (`localforage` 實作)。

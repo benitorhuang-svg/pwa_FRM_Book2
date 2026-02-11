@@ -10,147 +10,43 @@ export function formatPythonError(error) {
   const errorPatterns = [
     {
       pattern: /NameError: name '(.+)' is not defined/,
-      format: (match) => `❌ 變數錯誤：'${match[1]}' 未定義
-
-💡 可能的原因：
-• 變數名稱拼寫錯誤
-• 變數尚未宣告就使用
-• 注意 Python 區分大小寫（例如：data 和 Data 是不同的）
-
-🔧 建議：
-• 檢查變數名稱是否正確
-• 確認變數是否已經定義
-• 使用 print() 檢查變數值`
+      format: (match) => `❌ 變數錯誤：'${match[1]}' 未定義`
     },
     {
       pattern: /ModuleNotFoundError: No module named '(.+)'/,
-      format: (match) => `❌ 模組錯誤：找不到模組 '${match[1]}'
-
-💡 可能的原因：
-• 模組名稱拼寫錯誤
-• 該模組不支援瀏覽器環境
-• 模組尚未載入
-
-🔧 支援的模組：
-• numpy - 數值計算
-• pandas - 資料分析
-• matplotlib - 資料視覺化
-• scikit-learn - 機器學習 (sklearn)
-• scipy - 科學計算
-• statsmodels - 統計模型
-• plotly - 互動式圖表
-• arch - GARCH 模型
-• tabulate / prettytable - 表格格式化
-
-如需使用其他模組，請確認是否支援 Pyodide。`
+      format: (match) => `❌ 模組錯誤：找不到模組 '${match[1]}'`
     },
     {
       pattern: /SyntaxError/,
-      format: () => `❌ 語法錯誤
-
-💡 常見原因：
-• 括號、引號未配對
-• 縮排不正確
-• 冒號遺漏（if、for、def 等後面需要冒號）
-• 使用了中文標點符號
-
-🔧 建議：
-• 仔細檢查每一行的語法
-• 確保括號 ()、[] 和 {} 都有配對
-• 確保字串的引號配對（' 或 "）`
+      format: () => `❌ 語法錯誤`
     },
     {
       pattern: /IndentationError/,
-      format: () => `❌ 縮排錯誤
-
-💡 Python 使用縮排來表示程式碼區塊
-
-🔧 建議：
-• 使用一致的縮排（建議 4 個空格）
-• 不要混用空格和 Tab
-• 檢查 if、for、def 等語句後的縮排
-• 確保同一區塊的程式碼縮排相同`
+      format: () => `❌ 縮排錯誤`
     },
     {
       pattern: /TypeError: (.+)/,
-      format: (match) => `❌ 型別錯誤：${match[1]}
-    
-💡 可能的原因：
-• 對不支援的型別進行操作
-• 函數參數型別不正確
-• 嘗試對 None 進行操作
-    
-🔧 建議：
-• 檢查變數的型別（使用 type() 函數）
-• 確認函數參數是否正確
-• 檢查是否有變數為 None`
+      format: (match) => `❌ 型別錯誤：${match[1]}`
     },
     {
       pattern: /IndexError: (.+)/,
-      format: (match) => `❌ 索引錯誤：${match[1]}
-
-💡 可能的原因：
-• 存取超出範圍的索引
-• 列表或陣列為空
-
-🔧 建議：
-• 檢查索引值是否在有效範圍內
-• 使用 len() 檢查列表長度
-• 注意 Python 索引從 0 開始`
+      format: (match) => `❌ 索引錯誤：${match[1]}`
     },
     {
       pattern: /KeyError: (.+)/,
-      format: (match) => `❌ 鍵值錯誤：${match[1]}
-
-💡 可能的原因：
-• 字典中不存在該鍵值
-• DataFrame 中不存在該欄位
-
-🔧 建議：
-• 使用 .get() 方法安全地存取字典
-• 使用 .keys() 查看所有可用的鍵
-• 檢查鍵名是否拼寫正確`
+      format: (match) => `❌ 鍵值錯誤：${match[1]}`
     },
     {
       pattern: /ValueError: (.+)/,
-      format: (match) => `❌ 數值錯誤：${match[1]}
-    
-💡 可能的原因：
-• 函數接收到不合法的參數值
-• 型別轉換失敗
-• 數學運算的值不合法
-    
-🔧 建議：
-• 檢查函數參數的值是否合理
-• 確認資料格式是否正確
-• 檢查是否有空值或異常值`
+      format: (match) => `❌ 數值錯誤：${match[1]}`
     },
     {
       pattern: /ZeroDivisionError/,
-      format: () => `❌ 除以零錯誤
-
-💡 原因：
-• 嘗試除以零
-
-🔧 建議：
-• 在除法前檢查除數是否為零
-• 使用 if 語句避免除以零
-• 檢查資料中是否有零值`
+      format: () => `❌ 除以零錯誤`
     },
     {
       pattern: /ImportError:?\s*(.*)/,
-      format: (match) => `❌ 匯入錯誤${match[1] ? '：' + match[1].trim() : ''}
-
-💡 可能的原因：
-• 模組匯入失敗
-• 模組內部錯誤
-• Pyodide 環境未完全初始化
-
-🔧 建議：
-• 確認模組名稱正確
-• 檢查是否支援該模組
-• 重新整理頁面後再試一次
-• 查看瀏覽器主控台 (F12) 了解完整錯誤訊息`
+      format: (match) => `❌ 匯入錯誤${match[1] ? '：' + match[1].trim() : ''}`
     }
   ]
 
@@ -165,18 +61,7 @@ export function formatPythonError(error) {
   // 預設錯誤訊息
   return `❌ 執行錯誤
 
-${message}
-
-💡 提示：
-• 仔細閱讀錯誤訊息
-• 檢查程式碼語法和邏輯
-• 使用 print() 除錯
-• 參考範例程式碼
-
-🔧 除錯技巧：
-• 逐行執行程式碼找出問題
-• 使用 print() 輸出變數值
-• 簡化程式碼，逐步測試`
+${message}`
 }
 
 /**

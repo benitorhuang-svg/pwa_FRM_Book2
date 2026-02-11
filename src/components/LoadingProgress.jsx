@@ -55,7 +55,7 @@ export default function LoadingProgress({ stage, progress, error }) {
         <div className="loading-progress-icon">
           {getStageIcon()}
         </div>
-        
+
         <div className="loading-progress-text">
           <h3>{getStageText()}{dots}</h3>
           {error && (
@@ -67,7 +67,7 @@ export default function LoadingProgress({ stage, progress, error }) {
 
         {stage === 'downloading' && (
           <div className="loading-progress-bar">
-            <div 
+            <div
               className="loading-progress-bar-fill"
               style={{ width: `${progress}%` }}
             />
@@ -83,11 +83,6 @@ export default function LoadingProgress({ stage, progress, error }) {
         {stage === 'loading' && (
           <div className="loading-spinner" />
         )}
-      </div>
-
-      <div className="loading-progress-tips">
-        <p>💡 提示：首次載入可能需要 10-30 秒，請耐心等候</p>
-        <p>📱 建議使用 WiFi 連線以獲得最佳體驗</p>
       </div>
     </div>
   );

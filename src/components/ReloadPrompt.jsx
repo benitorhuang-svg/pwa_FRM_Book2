@@ -1,5 +1,5 @@
 import { useRegisterSW } from 'virtual:pwa-register/react'
-import { useState, useEffect } from 'react'
+import 'react'
 import './ReloadPrompt.css'
 
 function ReloadPrompt() {

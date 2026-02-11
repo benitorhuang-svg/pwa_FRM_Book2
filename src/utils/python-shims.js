@@ -306,12 +306,20 @@ def simulated_data_reader(name, data_source=None, start=None, end=None, **kwargs
         returns = np.random.normal(0.0005, 0.02, len(dates))
         price = base_price * np.exp(np.cumsum(returns))
         data[ticker] = price
+    # Logic dispatch based on data source
+    if data_source == 'fred':
+        # FRED returns columns named after the series ID (ticker)
+        return pd.DataFrame(data, index=dates)
+    
+    # Default (Yahoo-like): returns Adj Close, High, Low, etc. (Simulated as just Adj Close here)
     if len(tickers) > 1:
         df = pd.DataFrame(data, index=dates)
         df.columns = pd.MultiIndex.from_product([['Adj Close'], tickers])
         return df
     else:
-        df = pd.DataFrame({'Adj Close': data[name]}, index=dates)
+        # Fix: Use tickers[0] to avoid "unhashable type: list" if name was a list
+        target_ticker = tickers[0]
+        df = pd.DataFrame({'Adj Close': data[target_ticker]}, index=dates)
         return df
 
 try:
@@ -412,7 +420,7 @@ except Exception:
             def stats(self, moments='mvsk'): return loc, scale**2, None, None
         return N()
 
-    stats.norm = norm
+    stats.norm = norm()
     scipy.stats = stats
     sys.modules['scipy'] = scipy
     sys.modules['scipy.stats'] = stats
