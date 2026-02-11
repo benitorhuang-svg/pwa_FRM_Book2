@@ -155,7 +155,28 @@ def build_chapters_json():
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(chapters, f, ensure_ascii=False, indent=2)
     
+    # Also write per-chapter files and an index for per-chapter editing
+    index = []
+    for ch in chapters:
+        # filename pattern: chapters_<id>.json (id already lowercased)
+        fname = f"chapters_{ch['id']}.json"
+        fpath = output_dir / fname
+        with open(fpath, 'w', encoding='utf-8') as cf:
+            json.dump(ch, cf, ensure_ascii=False, indent=2)
+        index.append({
+            'id': ch['id'],
+            'title': ch.get('title', ''),
+            'number': ch.get('number', 0),
+            'file': fname
+        })
+
+    # write index file
+    index_file = output_dir / 'chapters_index.json'
+    with open(index_file, 'w', encoding='utf-8') as jf:
+        json.dump(index, jf, ensure_ascii=False, indent=2)
+
     print(f"\n✓ 成功建立 {output_file}")
+    print(f"  另存為各章節檔案及索引: {index_file.name}")
     print(f"  總共 {len(chapters)} 個章節")
     print(f"  總共 {sum(len(ch['examples']) for ch in chapters)} 個範例")
 

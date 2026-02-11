@@ -8,6 +8,9 @@ export default defineConfig({
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
+    hmr: {
+      host: 'localhost'
     }
   },
   plugins: [
@@ -16,11 +19,11 @@ export default defineConfig({
       strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'sw.js',
-      includeAssets: ['icons/*.png'],
+      includeAssets: ['icons/*.png', 'icons/*.jpg'],
       manifest: {
         name: 'pwa_實戰篇_手術刀般精準的FRM用Python科學管控財金風險',
         short_name: 'FRM_Python_實戰篇',
-        description: '手術刀般精準的 FRM 用 Python 科學管控財金風險 實戰篇 - 互動式學習',
+        description: '手術刀般精準的 FRM 用 Python 科學管控財金風險 - 互動式學習 (實戰篇)',
         theme_color: '#1e40af',
         background_color: '#ffffff',
         display: 'standalone',
@@ -71,50 +74,9 @@ export default defineConfig({
           }
         ]
       },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,json,whl}'],
-        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB for wheel files
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/(?:unpkg\.com|cdn\.jsdelivr\.net)\/pyodide@0\.26\.4\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'pyodide-cache-v2',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/(?:unpkg\.com|cdn\.jsdelivr\.net)\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'cdn-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              }
-            }
-          }
-        ]
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,png,wasm,zip,json,whl}'],
+        maximumFileSizeToCacheInBytes: 50 * 1024 * 1024 // 50MB for Pyodide assets
       }
     })
   ],

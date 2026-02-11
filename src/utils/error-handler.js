@@ -35,6 +35,12 @@ export function formatPythonError(error) {
 • numpy - 數值計算
 • pandas - 資料分析
 • matplotlib - 資料視覺化
+• scikit-learn - 機器學習 (sklearn)
+• scipy - 科學計算
+• statsmodels - 統計模型
+• plotly - 互動式圖表
+• arch - GARCH 模型
+• tabulate / prettytable - 表格格式化
 
 如需使用其他模組，請確認是否支援 Pyodide。`
     },

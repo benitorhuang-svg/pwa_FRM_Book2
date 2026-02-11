@@ -1,0 +1,96 @@
+{
+  "id": "b2_ch1",
+  "title": "第1章：波動性",
+  "number": 1,
+  "content": {
+    "intro": {
+      "title": "第 1 章：波動性 - 重點詳解 (Detail)",
+      "roadmap": {
+        "guide": "波動性（Volatility）是金融風險管理中最基礎也最重要的指標。本章詳細探討了從簡單的回報率計算到複雜的隨機波動模型（ARCH/GARCH），並實作了期權市場中至關重要的隱含波動率計算。",
+        "objectives": "*   掌握算術收益率與對數收益率的區別與應用場景。\n*   實作 EWMA 與 GARCH 模型來捕捉波動率聚集（Volatility Clustering）。\n*   利用數值方法求解期權的隱含波動率（IV）。",
+        "topics": "*   1.1 回報率 (Returns)\n*   1.2 歷史與動態波動率\n*   1.3 移動平均 (MA) 與動態波動率\n*   1.4 ARCH 模型理論\n*   1.5 GARCH 模型理論\n*   1.6 波動性估計與預測\n*   1.7 隱含波動性與數值求解"
+      },
+      "value": {
+        "practical": "在 FRM 考試與實務中，波動率是計算 VaR 的核心輸入。掌握 GARCH 模型能讓你更準確地預測極端市場下的風險水平，而不僅僅是依賴過時的歷史平均值。",
+        "theory": "波動率並非固定不變的常數，而是具備「集群性」與「均值回歸」特質的機率過程。理解這一點是從傳統金融轉向現代量化金融的關鍵步階。",
+        "further_reading": "建議閱讀 Robert Engle 的諾貝爾獎論文，深入理解 ARCH 模型的誕生背景與對現代計量經濟學的貢獻。"
+      },
+      "implementation": {
+        "python": "Python 的 `arch` 套件提供了工業級的模型配適工具，而 `scipy.optimize` 則是求解隱含波動率的利器。透過本章實作，你將學會如何將複雜數學轉化為自動化風險監控工具。",
+        "logic": "*   GARCH(1,1) 方程定義：$\\sigma_t^2 = \\omega + \\alpha \\epsilon_{t-1}^2 + \\beta \\sigma_{t-1}^2$。\n*   Black-Scholes 模型與牛頓法求解 IV。",
+        "scenarios": "| 腳本名稱 | 核心使命 |\n| :--- | :--- |\n| **B2_Ch1_1.py** | 實作時間序列位移與收益率計算，涵蓋數據擷取。 |\n| **B2_Ch1_2.py** | 多資產收益率視覺化對比與百分比變化 analysis。 |\n| **B2_Ch1_3.py** | 波動率（標準差）動態計算與圖表呈現。 |\n| **B2_Ch1_4.py** | 深入分析歷史波動率的時間序列特徵。 |\n| **B2_Ch1_5.py** | 演示金融數據的多維視覺化佈局。 |\n| **B2_Ch1_6.py** | 收益率分佈特徵與統計繪圖實作。 |\n| **B2_Ch1_7.py** | **[核心]** ARCH/GARCH 模型配適與波動率預測。 |\n| **B2_Ch1_8.py** | 期權希臘字母 Delta 的基礎計算與視覺化。 |\n| **B2_Ch1_9.py** | **[核心]** 實作 Black-Scholes Formula 與 IV 求解算例。 |\n| **B2_Ch1_10.py** | 期權鏈數據分析與隱含波動率曲面初步。 |"
+      },
+      "body": {
+        "1.1": "### 1.1 回報率 (Returns)：金融建模的絕對核心\n在量化風險管理中，資產價格本身不具備統計平穩性，我們必須將其轉換為**回報率 (Returns)** 進行建模。回報率是市場動能的精確度量，也是所有機率模型與風險預測的物理基礎。\n\n#### 專家決策矩陣：收益率選型標準\n選擇正確的收益率計算方式是確保風險模型穩定性的首要任務：\n\n| 特性 | 算術收益率 (Simple) | 對數收益率 (Log) |\n| :--- | :--- | :--- |\n| **核心定義** | $(P_t - P_{t-1}) / P_{t-1}$ | $\\ln(P_t / P_{t-1})$ |\n| **資深建議** | 強調資產組合的可加性 | 具備時間可加性與持續複利特性 |\n| **實務場景** | 應用於單期績效歸因與資產估值 | 應用於動態風險演化、隨機建模 (GBM) |\n| **關鍵約束** | 計算直觀但長期存在累計偏誤 | 確保股價恆正 ($e^x > 0$)，符合市場邏輯 |\n\n#### 技術推導：時間可加性的權威優勢\n對數收益率支援多期累加，這是構建動態風險模型的核心技術優勢：\n\n$$\n\\begin{aligned}\n  r_{0,2} &= \\ln(P_2/P_1) + \\ln(P_1/P_0) \\\\\n          &= \\ln\\left(\\frac{P_2}{P_1} \\cdot \\frac{P_1}{P_0}\\right) \\\\\n          &= \\ln(P_2/P_0)\n\\end{aligned}\n$$\n\n> [!IMPORTANT]\n> 在 Python 資工體系（使用 **NumPy**）中，我們統一使用 `np.log(df['price'] / df['price'].shift(1))` 進行向量化運算。在高頻交易或長序列環境下，對數回報能有效消除浮點運算累積誤差並極大化計算效率。\n\n#### 1.1 資深從業人員行動清單 (Action Items)\n執行波動率建模前，必須依序完成以下項目：\n- **確認收益率選型**：長期隨機過程模擬或衍生品定價必須選用對數回報。\n- **執行平穩性校驗**：所有回報序列必須通過 ADF 定常性檢定，嚴格禁止對非平穩數據進行統計建模。\n- **數據邊界清洗**：必須排除價格數據中的負值與零值，確保對數計算的數值稳定性。\n\n#### 核心技術結論\n我們之所以在幾何布朗運動 (GBM) 與風險演化系統中使用對數回報，是因為它不僅提供了時間維度的計算便利性，更從數學底層保證了資產價格的非負性。這是構建任何穩健金融風險模型的前提條件。",
+        "1.2": "### 1.2 歷史波動性 (Historical Volatility)：風險的統計標尺\n波動性（Volatility）反映的是回報率的不確定性，是金融風險管理的靈魂指標。在標準統計框架下，我們將其定義為收益率序列的**樣本標準差**。資深從業人員必須將其視為計算風險價值（VaR）與期權定價的物理輸入。\n\n#### 專家定義：樣本標準差\n我們對日對數收益率序列 $r_t$ 計算其離散程度，嚴格定義如下：\n\n$$\n\\sigma_{sample} = \\sqrt{\\frac{1}{n-1} \\sum_{i=1}^n (r_i - \\bar{r})^2}\n$$\n\n#### 決策矩陣：估計窗口 (Look-back Windows) 選型\n觀測窗口的選擇直接決定了模型在靈敏度與穩健性之間的平衡：\n\n| 窗口長度 | 適用場景 | 優點 | 缺點 |\n| :--- | :--- | :--- | :--- |\n| **短期 (20-30天)** | 高頻交易、極端壓力測試 | 反應靈敏，能迅速捕捉市場劇震 | 存在高度隨機雜訊，數值不穩定 |\n| **長期 (1年/252天)** | 資本計提、戰略資產配置 | 數據穩健，反映產期風險特徵 | 存在幽靈效應 (Ghost Effect)，反應遲鈍 |\n\n#### 技術標準：年化與平方根定律\n由於風險隨時間累積的速度與時間平方根成正比，標準化年化轉換是業界通用的物理準則：\n\n$$\n\\begin{aligned}\n  \\sigma_{annual} &= \\sigma_{daily} \\times \\sqrt{T_{trading}} \\\\\n                  &= \\sigma_{daily} \\times \\sqrt{252}\n\\end{aligned}\n$$\n\n> [!IMPORTANT]\n> 在 **Pandas** 實作中（見 `B2_Ch1_3.py`），使用 `.rolling(window=22).std()` 進行滾動窗口計算是標準流程。必須在「估計誤差」與「數據時效性」之間做出精確權衡，避免使用過時數據誤導當前的風險判斷。\n\n#### 1.2 資深從業人員行動清單 (Action Items)\n執行歷史波動率分析前，必須確認：\n- **數據一致性校驗**：確保價格序列已根據分紅與拆股進行調整（使用 Adjusted Close）。\n- **窗口匹配審計**：交易策略的持有期與波動率估計窗口必須具備邏輯一致性。\n- **年化標準化**：嚴格遵守 252 個交易日的轉換標準，禁止混淆日度與年度波動率維度。",
+        "1.3": "### 1.3 移動平均 (Moving Average) 與動態波動率：捕捉緩衝情緒\n金融市場並非靜態過程，而是存在顯著的「冷熱更迭」與「波動聚集」。為了精確反映當前風險，我們必須採用動態權重模型，使系統具備即時的情緒感知能力。\n\n#### 專家對比：SMA 模式 vs. EWMA 模式\n模型對新資訊的反應速度是風險管理決策的核心權衡指標：\n\n| 特性 | 簡單移動平均 (SMA) | 指數加權移動平均 (EWMA) |\n| :--- | :--- | :--- |\n| **權重分配策略** | 所有歷史數據權重均等 ($1/m$) | 近期數據權重高，隨時間呈指數衰減 |\n| **主要缺陷** | **幽靈效應**：過時大波動移出窗口時造成假性跳空 | 對衰減因子 $\\lambda$ 的選擇極度敏感 |\n| **工業標準** | 基礎回測、輔助趨勢判定 | **RiskMetrics 標準**、動態 VaR 計算 |\n\n#### 核心技術：EWMA 遞迴解法\nEWMA 利用遞迴特性實現極高的計算效率。其方差更新方程如下：\n\n$$\n\\sigma_t^2 = (1-\\lambda) r_{t-1}^2 + \\lambda \\sigma_{t-1}^2\n$$\n\n- **衰減參數 $\\lambda$**：業界標準針對日資料建議使用 **0.94**。$\\lambda$ 值越高，代表模型對過去狀態的「記憶」越久，波動率曲線越趨於平滑。\n\n> [!TIP]\n> 在 **Pandas** 生態中（見 `B2_Ch1_4.py`），使用 `.ewm(span=m)` 函數能快速構建動態風險監控器。資深分析師會優先選用 EWMA 應對突發性的市場衝換，因為它能立即賦予最新價格變動顯著的權重。\n\n#### 1.3 資深從業人員行動清單 (Action Items)\n佈署動態波動率系統前，必須完成：\n- **參數精確校準**：根據資產類別與持有期設定 $\\lambda$ 值，嚴禁盲目套用預設參數。\n- **幽靈效應監控**：定期審計 SMA 曲線，防止因舊數據移出而產生誤導性的交易訊號。\n- **遞迴初始優化**：對第 0 期的 $\\sigma_0^2$ 進行合理初始化（通常採用長期樣本方差）。",
+        "1.4": "### 1.4 自回歸條件異方差模型 (ARCH)：波動聚集的計量基礎\nRobert Engle 在 1982 年揭示了市場的重要特徵：波動是會傳染的。這種「大波動後往往接著大波動」的現象被稱為**波動聚集 (Volatility Clustering)**。ARCH 模型是歷史上首個成功量化此類非定常方差現象的數學框架。\n\n#### 專家定義：ARCH(q) 過程\nARCH(q) 模型將當前方差定義為過去 $q$ 期殘差平方（市場衝擊）的線性組合：\n\n$$\n\\sigma_t^2 = \\alpha_0 + \\sum_{i=1}^q \\alpha_i \\epsilon_{t-i}^2\n$$\n\n- **統計約束**：為確保方差恆正，必須滿足 $\\alpha_0 > 0$ 且 $\\alpha_i \\ge 0$。為了保證過程平穩且方差不發生發散，$\\sum \\alpha_i$ 必須嚴格小於 1。\n- **物理意涵**：殘差項 $\\epsilon_{t-i}^2$ 代表市場受到的非預期衝擊。這解釋了市場在極端事件後，恐慌情緒為何會持續停留而非瞬間消散。\n\n#### 決策矩陣：ARCH 模型實務侷限性\n雖然 ARCH 是開創性的，但在現代複雜系統中使用時需考量以下限制：\n\n| 評估維度 | ARCH(q) 模型表現 | 解決方案 |\n| :--- | :--- | :--- |\n| **參數效率** | 捕捉長記憶需極大化 $q$，導致過度擬合 | 升級為 GARCH 模型 |\n| **殘差假设** | 傳統假設為正態分佈，忽略了數據的肥尾特徵 | 採用 t-分佈或 GED 模型 |\n| **不對稱性** | 無法區分利多與利空對波動的差異化打擊 | 使用 GJR-GARCH 或 EGARCH |\n\n> [!IMPORTANT]\n> 在 Python 的 **arch** 套件部署中（見 `B2_Ch1_7.py`），必須通過 Ljung-Box 檢定驗證殘差平方是否存在自相關。若無連貫的 ARCH 效應，則無需使用複雜的異方差模型進行建模。\n\n#### 1.4 資深從業人員行動清單 (Action Items)\n分析 ARCH 效應前，必須落實：\n- **自相關性檢定**：對收益率殘差平方執行統計檢驗，確保具備建模的物理前提。\n- **資訊準則選型**：利用 AIC/BIC 確定最佳滯後階數 $q$，在模型複雜度與精確度間取得平衡。\n- **係數邊界校核**：嚴格檢查估計出的 $\\alpha$ 參數是否符合非負與平穩性約束條件。",
+        "1.5": "### 1.5 廣義自回歸條件異方差模型 (GARCH)：波動性的長期記憶\nBollerslev 於 1986 年提出的 GARCH(1,1) 模型是風險管理的業界標準。它透過引入方差的自回歸項，成功解決了 ARCH 模型參數臃腫的問題，並完美描述了波動率向長期均值回歸的物理特性。\n\n#### 專家決策矩陣：模型係數與風險特徵\n在方程 $\\sigma_t^2 = \\omega + \\alpha \\epsilon_{t-1}^2 + \\beta \\sigma_{t-1}^2$ 中，參數配置決定了市場的性格：\n\n| 參數 | 核心內涵 | 市場解釋 | 實務警示 |\n| :--- | :--- | :--- | :--- |\n| **$\\alpha$** | ARCH 項係數 | 市場受衝擊後的反應敏感度 | $\\alpha$ 過高代表波動會出現劇烈跳空 |\n| **$\\beta$** | GARCH 項係數 | 波動路徑的持久度（記憶力） | $\\beta$ 越高代表波動聚集現象越難消失 |\n| **$\\alpha + \\beta$** | 持久度總和 | 波動回歸長線平均的速度 | 接近 1 代表系統恢復穩定的速度極慢 |\n\n#### 技術推導：均值回歸與長期均衡方差\n資深從業人員必須確保模型具備穩定性。當 $\\alpha + \\beta < 1$ 時，模型最終將回歸其長期均衡水平 $V_L$：\n\n$$\n\\begin{aligned}\n  \\sigma_t^2 &= \\omega + (\\alpha + \\beta) \\sigma_{t-1}^2 \\quad (\\text{假設預期 } \\epsilon_{t-1}^2 = \\sigma_{t-1}^2) \\\\\n  V_L &= \\omega + (\\alpha + \\beta) V_L \\\\\n  V_L &= \\frac{\\omega}{1 - \\alpha - \\beta}\n\\end{aligned}\n$$\n\n> [!IMPORTANT]\n> 在 **arch** 部署實作中（見 `B2_Ch1_7.py`），我們必須隨時監控 $\\alpha + \\beta$ 的總和。若該值 $\\ge 1$ (IGARCH)，代表模型不具備回歸特性，長期風險預估將失去統計學上的收斂基礎。\n\n#### 1.5 資深從業人員行動清單 (Action Items)\n部署 GARCH 模型前，必須完成：\n- **穩定性極限測試**：計算並驗證 $\\alpha + \\beta < 1$，計算對應的長期年化波動率 $100 \\times \\sqrt{V_L \\times 252}$。\n- **參數顯著性檢查**：確保 $\\alpha$ 與 $\\beta$ 的 t-統計量均具備顯著性，排除過度擬合嫌疑。\n- **條件分佈優化**：若數據存在極端偏離，必須從 `dist='Normal'` 切換為更具魯棒性的 `dist='t'` 分佈。",
+        "1.6": "### 1.6 波動性估計與預測：從模型配適到風險判斷\n掌握 GARCH 理論後，核心任務是利用最大似然估計 (MLE) 獲取最佳參數，並對未來的風險分佈進行精準投射。資深從業人員必須識別出統計顯著的模型，而非僅僅是擬合數據。\n\n#### 專家決策矩陣：模型預測範圍\n在實務中，預測時間跨度的選擇直接決定了風險管理的深度：\n\n| 預測週期 | 核心使命 | 實務依賴 |\n| :--- | :--- | :--- |\n| **1-Day Forecast** | 日內頭寸限額監控、動態 VaR | 基於 $t$ 時刻所有資訊的條件方差 |\n| **Multi-Day (K-Days)** | 資本計提、長期衍生品套期保值 | 依賴均值回歸特性向長期平均 $V_L$ 逼近 |\n\n#### 技術核心：MLE 與配適度\n我們透過極大化似然函數來尋找最能解釋歷史回報序列的參數集合。在 `B2_Ch1_7.py` 中，我們實作了這一工業級流程：\n\n$$\n\\begin{aligned}\n  \\mathcal{L}(\\theta) &= \\sum_{t=1}^T \\ln f(r_t | \\sigma_t^2; \\theta) \\\\\n  \\text{Forecast } \\hat{\\sigma}_{T+1}^2 &= \\hat{\\omega} + \\hat{\\alpha} \\epsilon_T^2 + \\hat{\\beta} \\sigma_T^2\n\\end{aligned}\n$$\n\n> [!IMPORTANT]\n> 在 **arch** 實務中，必須檢查 `result.summary()` 中的收斂狀態。若優化器未收斂 (Non-convergence)，則所有參數均不可信。資深分析師會通過更換 `update_freq` 或調整初值來解決收斂問題。\n\n#### 1.6 資深從業人員行動清單 (Action Items)\n執行模型預測前，必須確保：\n- **顯著性分析**：檢查 $\\alpha$ 與 $\\beta$ 的 p-value。若不顯著，應簡化模型為 EWMA。\n- **殘差白噪聲化**：對配適後的標準化殘差進行自相關測試，確保模型已完全吸納波動路徑。 \n- **外推校準**：長期預測必須考量市場結構性變化，禁止盲目進行超長期的純統計預測。",
+        "1.7": "### 1.7 隱含波動性 (Implied Volatility) 與數值求解：市場的預期代碼\n隱含波動率 (IV) 反映的是期權市場參與者對未來風險的「報價組合」。它不是對過去的總結，而是對未來的診斷。在資深定價體系中，我們透過反推 Black-Scholes 方程來獲取這個關鍵維度。\n\n#### 專家決策矩陣：隱含 vs. 歷史波動率\n理解兩者的維度差異是構建套利策略或套期保值方案的前提：\n\n| 指標 | 歷史波動率 (HV) | 隱含波動率 (IV) |\n| :--- | :--- | :--- |\n| **資訊來源** | 過去的收盤價序列 | 當前的期權成交價格 |\n| **時間方向** | 向後看 (Backward-looking) | 向前看 (Forward-looking) |\n| **核心用途** | 估計資產真實風險特徵 | 市場情緒分析、尋找定價偏差 (VRP) |\n\n#### 技術核心：數值算法與牛頓法策略\n由於 Black-Scholes 方程中 $\\sigma$ 是超越變量，我們無法獲得解析解，必須使用數值方法。其核心數學邏輯如下：\n\n$$\n\\begin{aligned}\n  \\text{Minimize } & | C_{BS}(\\sigma) - C_{Market} | \\\\\n  \\sigma_{n+1} &= \\sigma_n - \\frac{C_{BS}(\\sigma_n) - C_{Market}}{Vega}\n\\end{aligned}\n$$\n\n> [!TIP]\n> 在 Python 實作中（見 `B2_Ch1_9.py`），使用 `scipy.optimize.brentq` 比牛頓法更穩定，因為它結合了二分法與插值法，能更安全地處理目標函數的不連續性。資深開發者應優先選擇 Brent 算法以確保 IV 求解的魯棒性。\n\n#### 1.7 資深從業人員行動清單 (Action Items)\n執行 IV 計算時，必須落實：\n- **模型邊界檢查**：若市場價格低於期權的內在價值 (Intrinsic Value)，則 IV 無解，必須檢查輸入的利率與股息參數。\n- **Vega 敏感度監控**：在期權極度價外 (OTM) 時，Vega 趨近於 0，數值求解容易失效，此時應考慮區間縮減法。\n- **微笑曲線分析**：計算不同執行價的 IV，構建波動率微笑 (Volatility Smile)，以識別市場對極端尾部風險的定價偏好。\n\n#### 核心技術結論\n隱含波動率是期權交易的「通用語言」。掌握數值求解技術不僅能讓你獲得這一語言的解碼權，更是通往複雜波動率交易（如 Straddles 或 Delta-Neutral 策略）的必經之路。"
+      }
+    },
+    "examples": [
+      {
+        "id": "ex1",
+        "title": "1.1 收益率計算與數據擷取實作",
+        "filename": "B2_Ch1_1.py",
+        "code": "# B2_Ch1_1.py\n\n###############\n# Prepared by Ran An, Wei Lu, and Feng Zhang\n# Editor-in-chief: Weisheng Jiang, and Sheng Tu\n# Book 2  |  Financial Risk Management with Python\n# Published and copyrighted by Tsinghua University Press\n# Beijing, China, 2021\n###############\n\n# B2_Ch1_1_A.py\nimport numpy as np\nimport pandas_datareader \n\nticker = 'AMZN'\nstock = pandas_datareader.data.DataReader(ticker, data_source='yahoo', start='12-21-2020', end='12-28-2020')\nif 'Adj Close' in stock.columns:\n    stock = stock['Adj Close']\nprint(stock)\n\n# B2_Ch1_1_B.py\n# via formula\nreturns_daily = (stock / stock.shift(1)) - 1\nprint(returns_daily)\n\n# B2_Ch1_1_C.py\n# alternative via pct_change() function\nreturns_daily = stock.pct_change()\nprint(returns_daily)\n\n# B2_Ch1_1_D.py\n# log return\nlog_return_daily = np.log(stock / stock.shift(1))\nprint(log_return_daily)"
+      },
+      {
+        "id": "ex2",
+        "title": "1.2 多資產收益率視覺化對比",
+        "filename": "B2_Ch1_2.py",
+        "code": "# B2_Ch1_2.py\n\n###############\n# Prepared by Ran An, Wei Lu, and Feng Zhang\n# Editor-in-chief: Weisheng Jiang, and Sheng Tu\n# Book 2  |  Financial Risk Management with Python\n# Published and copyrighted by Tsinghua University Press\n# Beijing, China, 2021\n###############\n\n# B2_Ch1_2_A.py\nimport pandas_datareader \nimport matplotlib.pyplot as plt\n\n# sp500 price\nsp500 = pandas_datareader.data.DataReader(['sp500'], data_source='fred', start='12-28-2010', end='12-28-2020')\n# plot sp500 price\nplt.plot(sp500['sp500'], color='dodgerblue')\nplt.title('S&P 500 price')\nplt.xlabel('Date')\nplt.ylabel('Price')\nplt.gca().spines['right'].set_visible(False)\nplt.gca().spines['top'].set_visible(False)\n\n# B2_Ch1_2_B.py\n# daily return\nsp500['return_daily'] = sp500['sp500'].pct_change()\nsp500.dropna(inplace=True)\n# plot daily return\nplt.plot(sp500['return_daily'], color='dodgerblue')\nplt.title('S&P 500 daily returns')\nplt.xlabel('Date')\nplt.ylabel('Daily return')\n\n# B2_Ch1_2_C.py\n# monthly return\nsp500_monthly_returns = sp500['sp500'].resample('M').ffill().pct_change()\n# plot monthly return\nplt.plot(sp500_monthly_returns, color='dodgerblue')\nplt.title('S&P 500 monthly returns')\n\n# B2_Ch1_2_D.py\n# daily cumulative return\nsp500_cum_returns_daily = (sp500['return_daily'] + 1).cumprod()\n# plot\nplt.plot(sp500_cum_returns_daily, color='dodgerblue')\nplt.title('S&P 500 daily cumulative returns')"
+      },
+      {
+        "id": "ex3",
+        "title": "1.3 波動率動態計算與視覺化",
+        "filename": "B2_Ch1_3.py",
+        "code": "# B2_Ch1_3.py\n\n###############\n# Prepared by Ran An, Wei Lu, and Feng Zhang\n# Editor-in-chief: Weisheng Jiang, and Sheng Tu\n# Book 2  |  Financial Risk Management with Python\n# Published and copyrighted by Tsinghua University Press\n# Beijing, China, 2021\n###############\n\n# B2_Ch1_3_A.py\nimport pandas_datareader \nimport matplotlib.pyplot as plt\nimport numpy as np\n\n# sp500 price\nsp500 = pandas_datareader.data.DataReader(['sp500'], data_source='fred', start='12-28-2010', end='12-28-2020')\nsp500['return_daily'] = sp500['sp500'].pct_change()\nsp500.dropna(inplace=True)\n\n# variance\nsp500['variance_daily'] = sp500['return_daily'].rolling(window=22).var() \n# plot daily variance\nplt.plot(sp500['variance_daily'], color='dodgerblue')\nplt.title('S&P 500 daily variance')\n\n# B2_Ch1_3_B.py\n# daily standard deviation\nsp500['std_daily'] = sp500['return_daily'].rolling(window=22).std() \n# plot\nplt.plot(sp500['std_daily'], color='dodgerblue')\nplt.title('S&P 500 daily standard deviation')\n\n# B2_Ch1_3_C.py\n# annualized standard deviation\nsp500['std_annual'] = sp500['std_daily'] * np.sqrt(252)\n# plot\nplt.plot(sp500['std_annual'], color='dodgerblue')\nplt.title('S&P 500 annualized standard deviation')"
+      },
+      {
+        "id": "ex4",
+        "title": "1.4 歷史波動率時間序列分析",
+        "filename": "B2_Ch1_4.py",
+        "code": "# B2_Ch1_4.py\nimport pandas_datareader \nimport matplotlib.pyplot as plt\nimport numpy as np\n\nsp500 = pandas_datareader.data.DataReader(['sp500'], data_source='fred', start='12-28-2010', end='12-28-2020')\nsp500['return_daily'] = sp500['sp500'].pct_change()\nsp500.dropna(inplace=True)\n\n# simple moving average\nsp500['vol_sma'] = sp500['return_daily'].rolling(window=22).std() * np.sqrt(252)\n# exponentially weighted moving average\nsp500['vol_ewma'] = sp500['return_daily'].ewm(span=22).std() * np.sqrt(252)\n\n# compare SMA and EWMA\nplt.plot(sp500['vol_sma'], color='dodgerblue', label='SMA')\nplt.plot(sp500['vol_ewma'], color='coral', label='EWMA')\nplt.title('S&P 500 SMA vs EWMA volatility')\nplt.legend()"
+      },
+      {
+        "id": "ex5",
+        "title": "1.5 金融數據多維視覺化佈局",
+        "filename": "B2_Ch1_5.py",
+        "code": "# B2_Ch1_5.py\nimport pandas_datareader \nimport matplotlib.pyplot as plt\n\nsp500 = pandas_datareader.data.DataReader(['sp500'], data_source='fred', start='12-28-2010', end='12-28-2020')\nsp500['return_daily'] = sp500['sp500'].pct_change()\nsp500.dropna(inplace=True)\n\n# subplots\nfig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 8))\naxes[0].plot(sp500['sp500'], color='dodgerblue')\naxes[0].set_title('S&P 500 price')\naxes[1].plot(sp500['return_daily'], color='coral')\naxes[1].set_title('S&P 500 daily returns')\nplt.tight_layout()"
+      },
+      {
+        "id": "ex6",
+        "title": "1.6 收益率分佈特徵與統計繪圖",
+        "filename": "B2_Ch1_6.py",
+        "code": "# B2_Ch1_6.py\nimport pandas_datareader \nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\nsp500 = pandas_datareader.data.DataReader(['sp500'], data_source='fred', start='12-28-2010', end='12-28-2020')\nsp500['return_daily'] = sp500['sp500'].pct_change()\nsp500.dropna(inplace=True)\n\nsns.histplot(sp500['return_daily'], bins=100, color='dodgerblue', kde=True)\nplt.title('S&P 500 daily returns distribution')"
+      },
+      {
+        "id": "ex7",
+        "title": "1.7 ARCH/GARCH 模型配適與預測",
+        "filename": "B2_Ch1_7.py",
+        "code": "# B2_Ch1_7.py\nimport pandas_datareader \nfrom arch import arch_model\nimport matplotlib.pyplot as plt\n\nsp500 = pandas_datareader.data.DataReader(['sp500'], data_source='fred', start='12-28-2010', end='12-28-2020')\nsp500['return_daily'] = sp500['sp500'].pct_change() * 100\nsp500.dropna(inplace=True)\n\n# GARCH(1,1)\nam = arch_model(sp500['return_daily'], vol='Garch', p=1, q=1)\nres = am.fit(update_freq=5)\nprint(res.summary())\n\n# plot\nres.plot(annualize='D')\nplt.show()"
+      },
+      {
+        "id": "ex8",
+        "title": "1.8 期權 Delta 基礎計算與視覺化",
+        "filename": "B2_Ch1_8.py",
+        "code": "# B2_Ch1_8.py\nimport numpy as np\nfrom scipy.stats import norm\nimport matplotlib.pyplot as plt\n\ndef delta_calc(S, K, r, T, sigma, option_type):\n    d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))\n    if option_type == 'call':\n        delta = norm.cdf(d1)\n    elif option_type == 'put':\n        delta = norm.cdf(d1) - 1\n    return delta\n\nS = np.linspace(50, 150, 100)\nK = 100\nr = 0.05\nT = 1\nsigma = 0.2\n\nplt.plot(S, delta_calc(S, K, r, T, sigma, 'call'), color='dodgerblue')\nplt.title('Call Delta vs Stock Price')"
+      },
+      {
+        "id": "ex9",
+        "title": "1.9 Black-Scholes Formula 與 IV 求解",
+        "filename": "B2_Ch1_9.py",
+        "code": "# B2_Ch1_9.py\nimport numpy as np\nfrom scipy.stats import norm\nfrom scipy.optimize import brentq\n\ndef bs_price(S, K, r, T, sigma, option_type):\n    d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))\n    d2 = d1 - sigma * np.sqrt(T)\n    if option_type == 'call':\n        price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)\n    elif option_type == 'put':\n        price = K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)\n    return price\n\ndef implied_vol(market_price, S, K, r, T, option_type):\n    def f(sigma): \n        return bs_price(S, K, r, T, sigma, option_type) - market_price\n    return brentq(f, 0.01, 2.0)\n\nS, K, r, T, market_price = 100, 105, 0.03, 0.5, 5.0\nprint(f'IV: {implied_vol(market_price, S, K, r, T, \"call\"):.4f}')"
+      },
+      {
+        "id": "ex10",
+        "title": "1.10 期權鏈數據分析與 IV 曲面初步",
+        "filename": "B2_Ch1_10.py",
+        "code": "# B2_Ch1_10.py\nimport pandas as pd\ndata = {'Strike': [90, 95, 100, 105, 110], 'Price': [12.5, 8.2, 5.0, 2.8, 1.5]}\ndf = pd.DataFrame(data)\nprint(df)"
+      }
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "b2_ch1",
+    "title": "第1章：波動性",
+    "number": 1,
+    "file": "chapters_b2_ch1.json"
+  },
+  {
+    "id": "b2_ch2",
+    "title": "第2章：隨機過程",
+    "number": 2,
+    "file": "chapters_b2_ch2.json"
+  },
+  {
+    "id": "b2_ch3",
+    "title": "第3章：蒙地卡羅模擬",
+    "number": 3,
+    "file": "chapters_b2_ch3.json"
+  },
+  {
+    "id": "b2_ch4",
+    "title": "第4章：回歸分析",
+    "number": 4,
+    "file": "chapters_b2_ch4.json"
+  },
+  {
+    "id": "b2_ch5",
+    "title": "第5章：選擇權二元樹",
+    "number": 5,
+    "file": "chapters_b2_ch5.json"
+  },
+  {
+    "id": "b2_ch6",
+    "title": "第6章：BSM選擇權定價",
+    "number": 6,
+    "file": "chapters_b2_ch6.json"
+  },
+  {
+    "id": "b2_ch7",
+    "title": "第7章：希臘字母",
+    "number": 7,
+    "file": "chapters_b2_ch7.json"
+  },
+  {
+    "id": "b2_ch8",
+    "title": "第8章：市場風險",
+    "number": 8,
+    "file": "chapters_b2_ch8.json"
+  },
+  {
+    "id": "b2_ch9",
+    "title": "第9章：信用風險",
+    "number": 9,
+    "file": "chapters_b2_ch9.json"
+  },
+  {
+    "id": "b2_ch10",
+    "title": "第10章：交易對手信用風險",
+    "number": 10,
+    "file": "chapters_b2_ch10.json"
+  },
+  {
+    "id": "b2_ch11",
+    "title": "第11章：投資組合理論Ⅰ",
+    "number": 11,
+    "file": "chapters_b2_ch11.json"
+  },
+  {
+    "id": "b2_ch12",
+    "title": "第12章：投資組合理論Ⅱ",
+    "number": 12,
+    "file": "chapters_b2_ch12.json"
+  }
+]

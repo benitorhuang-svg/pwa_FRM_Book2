@@ -9,6 +9,7 @@ function CodePreviewPanel({
   onClose,
   onRun,
   isRunning,
+  isLoading,
   darkMode,
   onResize
 }) {
@@ -101,13 +102,18 @@ function CodePreviewPanel({
                 <button
                   className="btn btn-primary btn-sm"
                   onClick={() => {
+                    if (isLoading) {
+                      showLocalToast('請等待引擎初始化完成...', 'info')
+                      return
+                    }
                     showLocalToast('開始執行程式...', 'success')
                     onRun(script.code)
                   }}
-                  disabled={isRunning}
+                  disabled={isRunning || isLoading}
+                  title={isLoading ? "核心引擎初始化中..." : "執行程式碼"}
                 >
                   <Play size={16} />
-                  {isRunning ? '執行中...' : '執行'}
+                  {isRunning ? '執行中...' : (isLoading ? '引擎啟動中' : '執行')}
                 </button>
 
                 <div className="divider-vertical"></div>
@@ -133,7 +139,9 @@ function CodePreviewPanel({
                   padding: '1rem',
                   fontSize: '0.85rem',
                   lineHeight: '1.6',
-                  background: 'transparent'
+                  background: 'transparent',
+                  whiteSpace: 'pre-wrap',       /* Enable wrapping */
+                  wordBreak: 'break-word'       /* Prevent overflow */
                 }}
                 showLineNumbers
               >
@@ -143,7 +151,7 @@ function CodePreviewPanel({
           </div>
           {/* Output Section Removed (Moved to FloatingOutput) */}
         </div>
-      </div>
+      </div >
     </>
   )
 }

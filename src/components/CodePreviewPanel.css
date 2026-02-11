@@ -1,5 +1,5 @@
 .resizer {
-  width: 16px;
+  width: 12px;
   /* Increased hit area slightly */
   cursor: col-resize;
   background: transparent;
@@ -7,32 +7,38 @@
   position: relative;
   z-index: 50;
   flex-shrink: 0;
-  margin: 0 -8px;
+  margin: 0 -6px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .resizer-handle {
-  width: 20px;
-  height: 20px;
-  background: var(--bg-card);
-  border: 1.5px solid var(--accent-color);
+  width: 24px;
+  height: 24px;
+  background: white;
+  border: 1px solid var(--accent-color);
+  /* Thinner border */
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--accent-color);
-  opacity: 0;
+  opacity: 0.6;
+  /* Reduced default opacity */
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* Softer shadow */
+  z-index: 50;
 }
 
 .resizer:hover .resizer-handle,
 .resizer.dragging .resizer-handle {
-  opacity: 1;
   transform: scale(1.1);
+  opacity: 1;
+  /* Full opacity on interaction */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-width: 2px;
 }
 
 .resizer::before {
@@ -59,28 +65,34 @@
 
 .resizer:hover,
 .resizer.dragging {
-  background: hsla(200, 95%, 50%, 0.08);
+  background: hsla(200, 95%, 50%, 0.05);
 }
 
 .code-preview-panel {
-  background: var(--preview-bg);
-  border-left: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
   min-width: 300px;
   max-width: 70vw;
+  border-radius: var(--radius-xl);
+  margin: 0.75rem;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
 }
 
 .app.dark .code-preview-panel {
-  background: var(--preview-bg);
-  border-left-color: var(--glass-border);
+  background: var(--glass-bg);
+  /* Use glass bg in dark mode too */
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.4);
 }
 
 .app:not(.dark) .code-preview-panel {
-  background: #ffffff;
-  border-left-color: var(--glass-border);
+  /* Remove solid white override to allow glass effect */
 }
 
 .preview-header {
@@ -217,7 +229,8 @@
 }
 
 .app:not(.dark) .code-display {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.5);
+  /* Semi-transparent in light mode */
 }
 
 .output-section {
@@ -240,7 +253,7 @@
 }
 
 .app:not(.dark) .output-display {
-  background: #f8fafc;
+  background: rgba(248, 250, 252, 0.5);
 }
 
 .output-text {

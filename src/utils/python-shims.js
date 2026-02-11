@@ -306,13 +306,11 @@ def simulated_data_reader(name, data_source=None, start=None, end=None, **kwargs
         returns = np.random.normal(0.0005, 0.02, len(dates))
         price = base_price * np.exp(np.cumsum(returns))
         data[ticker] = price
-
     if len(tickers) > 1:
         df = pd.DataFrame(data, index=dates)
         df.columns = pd.MultiIndex.from_product([['Adj Close'], tickers])
         return df
     else:
-        # 單一股票：返回一個以日期為索引、Adj Close 為欄位名的簡單 DataFrame
         df = pd.DataFrame({'Adj Close': data[name]}, index=dates)
         return df
 
@@ -320,103 +318,244 @@ try:
     import sys
     import pandas_datareader
     import pandas_datareader.data as pdr_data
-    # 同時覆蓋多個入口點以確保成功
     methods = ['DataReader', 'get_data_yahoo', 'get_data_stooq', 'get_data_fred']
     for method in methods:
         setattr(pdr_data, method, simulated_data_reader)
         setattr(pandas_datareader, method, simulated_data_reader)
-        
-    # 注入到 sys.modules 確保直接匯入也生效
     sys.modules['pandas_datareader.data'].DataReader = simulated_data_reader
     sys.modules['pandas_datareader'].DataReader = simulated_data_reader
-    # 針對像 import pandas_datareader as web; web.get_data_yahoo 這種寫法
     for method in methods:
         setattr(sys.modules['pandas_datareader.data'], method, simulated_data_reader)
         setattr(sys.modules['pandas_datareader'], method, simulated_data_reader)
     print("✅ 模擬數據引擎：攔截器已成功啟動。")
 except ImportError:
-    # Silent for lazy loading
     pass
 except Exception as e:
     print(f"⚠️ 模擬數據引擎啟動失敗: {str(e)}")
 `;
 
+export const SCIPY_RVS_SHIM = `
+# SciPy .rvs() 相容性墊片
+try:
+    import scipy.stats as _scipy_stats
+    import numpy as _np
+    _orig_rvs = _scipy_stats.rv_generic.rvs
+
+    def _patched_rvs(self, *args, **kwargs):
+        try:
+            return _orig_rvs(self, *args, **kwargs)
+        except (ImportError, AttributeError) as _e:
+            if 'fblas' not in str(_e) and 'flapack' not in str(_e):
+                raise
+            _name = getattr(self, 'name', getattr(getattr(self, 'dist', None), 'name', ''))
+            _size = kwargs.get('size', None)
+            _loc = kwargs.get('loc', 0)
+            _scale = kwargs.get('scale', 1)
+            _fallback_map = {
+                'bernoulli': lambda: _np.random.binomial(1, args[0] if args else kwargs.get('p', 0.5), size=_size),
+                'binom': lambda: _np.random.binomial(args[0] if args else kwargs.get('n', 1), args[1] if len(args) > 1 else kwargs.get('p', 0.5), size=_size),
+                'uniform': lambda: _np.random.uniform(_loc, _loc + _scale, size=_size),
+                'norm': lambda: _np.random.normal(_loc, _scale, size=_size),
+                'expon': lambda: _np.random.exponential(_scale, size=_size) + _loc,
+                'poisson': lambda: _np.random.poisson(args[0] if args else kwargs.get('mu', 1), size=_size),
+                'geom': lambda: _np.random.geometric(args[0] if args else kwargs.get('p', 0.5), size=_size),
+                'randint': lambda: _np.random.randint(args[0] if args else kwargs.get('low', 0), args[1] if len(args) > 1 else kwargs.get('high', 2), size=_size),
+            }
+            if _name in _fallback_map:
+                return _fallback_map[_name]()
+            raise
+
+    _scipy_stats.rv_generic.rvs = _patched_rvs
+    print("✅ SciPy 相容性：.rvs() 安全墊片已啟動。")
+except Exception:
+    pass
+`;
+
+export const SCIPY_STUB = `
+# Lightweight SciPy stub
+try:
+    import scipy
+except Exception:
+    import types, sys
+    import numpy as np
+    import math
+
+    scipy = types.ModuleType('scipy')
+    stats = types.ModuleType('scipy.stats')
+
+    def _scalar_or_array(func):
+        def wrapper(x, *args, **kwargs):
+            x_arr = np.array(x)
+            if x_arr.shape == (): return func(float(x), *args, **kwargs)
+            return np.array([func(float(xi), *args, **kwargs) for xi in x_arr])
+        return wrapper
+
+    def norm(loc=0.0, scale=1.0):
+        class N:
+            name = 'norm'
+            def rvs(self, size=None, **kwargs): return np.random.normal(loc, scale, size=size)
+            @_scalar_or_array
+            def pdf(self, x): return math.exp(-0.5*((x-loc)/scale)**2)/(scale*math.sqrt(2*math.pi))
+            @_scalar_or_array
+            def cdf(self, x): return 0.5*(1+math.erf((x-loc)/(scale*math.sqrt(2))))
+            def ppf(self, q):
+                def cdf_fn(x): return 0.5*(1+math.erf((x-loc)/(scale*math.sqrt(2))))
+                def scalar_ppf(qi):
+                    a, b = loc - 10*scale, loc + 10*scale
+                    for _ in range(60):
+                        m = 0.5*(a+b)
+                        if cdf_fn(m) < qi: a = m
+                        else: b = m
+                    return 0.5*(a+b)
+                if hasattr(q, '__iter__'): return np.array([scalar_ppf(float(qi)) for qi in q])
+                return scalar_ppf(float(q))
+            def stats(self, moments='mvsk'): return loc, scale**2, None, None
+        return N()
+
+    stats.norm = norm
+    scipy.stats = stats
+    sys.modules['scipy'] = scipy
+    sys.modules['scipy.stats'] = stats
+    print('✅ SciPy stub installed.')
+`;
+
 export const BASE_ENV_SETUP = `
 import warnings
-# 忽略 DeprecationWarning 和 FutureWarning，保持 Console 乾淨
 warnings.simplefilter("ignore", DeprecationWarning)
 warnings.simplefilter("ignore", FutureWarning)
 warnings.simplefilter("ignore", SyntaxWarning)
-# 額外針對 pandas 的 pyarrow 警告進行過濾
 warnings.filterwarnings("ignore", message=".*pyarrow.*")
 
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    pass
-
 import numpy as np
+if not hasattr(np, 'int'): np.int = int
+if not hasattr(np, 'float'): np.float = float
+if not hasattr(np, 'bool'): np.bool = bool
 
 try:
-    import pandas as pd
-except ImportError:
-    pass
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    plt.rcParams['font.family'] = ['DejaVu Sans', 'sans-serif']
+except Exception: pass
 
 import builtins
 import js
-
 def custom_input(prompt=""):
     result = js.window.prompt(prompt)
     return result if result is not None else ""
-
 builtins.input = custom_input
 
-import numpy as np
-# 恢復舊版本 NumPy 的別名，以相容書中範例程式碼
-if not hasattr(np, 'int'):
-    np.int = int
-if not hasattr(np, 'float'):
-    np.float = float
-if not hasattr(np, 'bool'):
-    np.bool = bool
-
-# NumPy Financial 相容性 (np.irr, np.npv 等在新版本 NumPy 移除)
 try:
     import numpy_financial as npf
-    fin_functions = ['irr', 'npv', 'pmt', 'pv', 'rate', 'nper', 'fv', 'ppmt', 'ipmt']
-    for func in fin_functions:
-        if not hasattr(np, func) and hasattr(npf, func):
-            setattr(np, func, getattr(npf, func))
-    print("✅ NumPy Financial：財務函數補丁已套用。")
-except ImportError:
-    pass
+    for func in ['irr', 'npv', 'pmt', 'pv', 'rate', 'nper', 'fv', 'ppmt', 'ipmt']:
+        if not hasattr(np, func) and hasattr(npf, func): setattr(np, func, getattr(npf, func))
+except ImportError: pass
 
-# distutils 相容性 (Python 3.12 移除)
 import sys
-try:
-    import setuptools
-    import distutils
-except ImportError:
-    # 如果 setuptools 沒提供，建立虛擬模組避免 error
-    from types import ModuleType
-    d = ModuleType('distutils')
-    sys.modules['distutils'] = d
+from types import ModuleType
 
-# 網路支援
+# 徹底解決 distutils 在 Python 3.12 缺失的問題
+try:
+    import distutils
+    import distutils.version
+except ImportError:
+    d = ModuleType('distutils')
+    dv = ModuleType('distutils.version')
+    du = ModuleType('distutils.util')
+    ds = ModuleType('distutils.spawn')
+    
+    # Stub LooseVersion for libraries like sklearn/statsmodels
+    class LooseVersion:
+        def __init__(self, vstring): self.v = vstring
+        def __str__(self): return self.v
+        def __repr__(self): return f"LooseVersion('{self.v}')"
+        def __lt__(self, other): return False
+        def __le__(self, other): return True
+        def __gt__(self, other): return True
+        def __ge__(self, other): return True
+        def __eq__(self, other): return True
+    
+    dv.LooseVersion = LooseVersion
+    d.version = dv
+    d.util = du
+    d.spawn = ds
+    
+    sys.modules['distutils'] = d
+    sys.modules['distutils.version'] = dv
+    sys.modules['distutils.util'] = du
+    sys.modules['distutils.spawn'] = ds
+    print("✅ distutils 相容性：已建立虛擬子模組與 LooseVersion 樁。")
+
 try:
     import pyodide_http
     pyodide_http.patch_all()
-except ImportError:
-    pass
+except ImportError: pass
 
-# SciPy 相容性 (binom_test 在新版本移除)
 try:
     import scipy.stats
     if not hasattr(scipy.stats, 'binom_test') and hasattr(scipy.stats, 'binomtest'):
-        def binom_test_shim(k, n=None, p=0.5, alternative='two-sided'):
-            return scipy.stats.binomtest(k, n, p, alternative).pvalue
-        scipy.stats.binom_test = binom_test_shim
-        print("✅ SciPy 相容性：binom_test 修正補丁已套用。")
-except ImportError:
-    pass
+        scipy.stats.binom_test = lambda k, n=None, p=0.5, alt='two-sided': scipy.stats.binomtest(k, n, p, alt).pvalue
+except ImportError: pass
+`;
+
+export const DATASET_SHIM = `
+# Dataset path redirection: intercept hardcoded absolute paths and redirect to virtual /data directory
+import os
+import sys
+
+def check_and_redirect(path):
+    if not isinstance(path, str):
+        return path
+    # If path looks like Windows or Unix absolute path
+    if (':' in path and '\\\\' in path) or path.startswith('/'):
+        filename = os.path.basename(path)
+        # Search virtual /data directory
+        for root, dirs, files in os.walk('/data'):
+            if filename in files:
+                target = os.path.join(root, filename)
+                print(f"📂 Dataset Redirect: Intercepted {path} -> Using virtual path {target}")
+                return target
+    return path
+
+try:
+    import pandas as pd
+    _orig_read_csv = pd.read_csv
+    _orig_read_excel = pd.read_excel
+    def patched_read_csv(filepath_or_buffer, *args, **kwargs):
+        return _orig_read_csv(check_and_redirect(filepath_or_buffer), *args, **kwargs)
+    def patched_read_excel(io, *args, **kwargs):
+        return _orig_read_excel(check_and_redirect(io), *args, **kwargs)
+    pd.read_csv = patched_read_csv
+    pd.read_excel = patched_read_excel
+    print("✅ Dataset Redirect: Successfully hooked pandas read functions.")
+except ImportError: pass
+except Exception as e: print(f"⚠️ Dataset Redirect Patch Error: {str(e)}")
+`;
+
+export const MCINT_SHIM = `
+# mcint (Monte Carlo Integration) stub for browser environments
+import sys
+from types import ModuleType
+
+mcint = ModuleType('mcint')
+sys.modules['mcint'] = mcint
+
+def mcint_integrate(integrand, sampler, measure, n):
+    total = 0.0
+    total_sq = 0.0
+    # Process in chunks to maintain UI responsiveness if needed, but for now simple loop
+    for _ in range(n):
+        point = next(sampler)
+        val = integrand(point)
+        total += val
+        total_sq += val * val
+    
+    mean = total / n
+    var = (total_sq / n) - (mean ** 2)
+    result = mean * measure
+    error = (max(0, var) ** 0.5) * measure / (n ** 0.5)
+    return result, error
+
+mcint.integrate = mcint_integrate
+print("✅ mcint (Monte Carlo) shim installed.")
 `;
