@@ -1,7 +1,7 @@
 # 1. 觸發條件 (什麼時候執行？)
 on:
   push:
-    branches: [master] # 當有程式碼被 push 到 master 分支時
+    branches: [main] # 當有程式碼被 push 到 main 分支時
   workflow_dispatch: # 或者是手動點擊按鈕觸發
 
 # 2. 權限設定 (允許機器人做什麼？)
