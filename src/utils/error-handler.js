@@ -132,17 +132,19 @@ export function formatPythonError(error) {
 • 檢查資料中是否有零值`
     },
     {
-      pattern: /ImportError/,
-      format: () => `❌ 匯入錯誤
+      pattern: /ImportError:?\s*(.*)/,
+      format: (match) => `❌ 匯入錯誤${match[1] ? '：' + match[1].trim() : ''}
 
 💡 可能的原因：
 • 模組匯入失敗
 • 模組內部錯誤
+• Pyodide 環境未完全初始化
 
 🔧 建議：
 • 確認模組名稱正確
 • 檢查是否支援該模組
-• 查看完整錯誤訊息了解詳情`
+• 重新整理頁面後再試一次
+• 查看瀏覽器主控台 (F12) 了解完整錯誤訊息`
     }
   ]
 
