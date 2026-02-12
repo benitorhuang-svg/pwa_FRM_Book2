@@ -53,13 +53,13 @@ export class PerformanceMonitor {
     const emoji = duration < 100 ? '⚡' : duration < 1000 ? '⏱️' : '🐌'
     const color = duration < 100 ? 'color: green' : duration < 1000 ? 'color: orange' : 'color: red'
 
-    console.warn(
+    console.debug(
       `%c${emoji} ${label}: ${duration.toFixed(2)}ms`,
       color
     )
 
-    // 如果太慢，發出警告
-    if (duration > 1000) {
+    // 如果太慢，發出警告 (僅維持真正慢的操作為 warn)
+    if (duration > 3000) {
       console.warn(`⚠️ ${label} 執行時間過長: ${duration.toFixed(2)}ms`)
     }
   }
@@ -199,6 +199,7 @@ let isVitalsReporting = false
  */
 export function reportWebVitals() {
   if (isVitalsReporting) return
+  if (!perfMonitor.enabled) return // 只在啟用監控時報告
   isVitalsReporting = true
 
   if ('PerformanceObserver' in window) {
@@ -206,7 +207,8 @@ export function reportWebVitals() {
     const lcpObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries()
       const lastEntry = entries[entries.length - 1]
-      console.warn('🎨 LCP:', lastEntry.renderTime || lastEntry.loadTime)
+      // 改為 debug 層級以減少噪音
+      console.debug('🎨 LCP:', lastEntry.renderTime || lastEntry.loadTime)
     })
     lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
 
@@ -214,7 +216,7 @@ export function reportWebVitals() {
     const fidObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries()
       entries.forEach((entry) => {
-        console.warn('⚡ FID:', entry.processingStart - entry.startTime)
+        console.debug('⚡ FID:', entry.processingStart - entry.startTime)
       })
     })
     fidObserver.observe({ entryTypes: ['first-input'] })
@@ -228,7 +230,7 @@ export function reportWebVitals() {
           clsScore += entry.value
         }
       })
-      console.warn('📐 CLS:', clsScore)
+      console.debug('📐 CLS:', clsScore)
     })
     clsObserver.observe({ entryTypes: ['layout-shift'] })
   }
