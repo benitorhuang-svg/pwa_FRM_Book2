@@ -1,21 +1,17 @@
-import { useEffect, useMemo, memo } from 'react'
+import { useEffect, useMemo, memo, useRef } from 'react'
 import { Marked } from 'marked'
-import markedKatex from 'marked-katex-extension'
+import renderMathInElement from 'katex/dist/contrib/auto-render'
 import DOMPurify from 'dompurify'
 import './ContentPanel.css'
 import './WelcomeScreen.css'
 
-// Configure KaTeX extension with proper delimiters
-// Create a dedicated Marked instance to avoid global state pollution and HMR issues
-const marked = new Marked(
-  markedKatex({
-    throwOnError: false,
-    output: 'html',
-    nonStandard: true // Ensure $ delimiters are enabled
-  })
-)
+// Create a dedicated Marked instance
+const marked = new Marked()
+
 
 const ContentPanel = memo(({ chapter, onCodeClick, selectedTopicId, output, isRunning, plotImages }) => {
+  const containerRef = useRef(null)
+
   // Use useMemo to prevent expensive markdown parsing on every re-render (like when resizing)
   const renderedContent = useMemo(() => {
     if (!chapter) return null
@@ -85,11 +81,33 @@ const ContentPanel = memo(({ chapter, onCodeClick, selectedTopicId, output, isRu
         ''
       )
 
-      // Pre-process for KaTeX: Ensure proper spacing around math delimiters
+      // Pre-process for KaTeX: recover common corrupted delimiters and escapes
       rawMarkdown = rawMarkdown
-        .replace(/\s*\$\$\s*/g, '\n$$\n')
+        // Replace literal escaped-dollar-dollar sequences like "\\$$" -> "$$"
+        .replace(/\\+\$\$/g, '$$')
+        // Collapse sequences of multiple $ into a single $$
+        .replace(/\${3,}/g, '$$')
+        // Collapse repeated $$ separated only by whitespace or backslashes
+        .replace(/\$\$[\s\\]*\$\$/g, '$$')
+
+      // ── Protect math blocks from marked parsing ──
+      // Extract $$...$$ blocks BEFORE marked processes the markdown,
+      // so marked cannot split them into separate <p> tags.
+      const mathBlocks = []
+      rawMarkdown = rawMarkdown.replace(/\$\$([\s\S]*?)\$\$/g, (match, inner) => {
+        const idx = mathBlocks.length
+        mathBlocks.push(inner)
+        return `%%MATHBLOCK_${idx}%%`
+      })
 
       let rawHtml = marked.parse(rawMarkdown)
+
+      // Re-insert math blocks after marked parsing
+      rawHtml = rawHtml.replace(/%%MATHBLOCK_(\d+)%%/g, (match, idx) => {
+        return `$$${mathBlocks[parseInt(idx)]}$$`
+      })
+
+
 
       // Inject IDs into <h3> tags for anchoring
       rawHtml = rawHtml.replace(/<h3>(.*?)<\/h3>/g, (match, title) => {
@@ -99,13 +117,17 @@ const ContentPanel = memo(({ chapter, onCodeClick, selectedTopicId, output, isRu
       })
 
       const cleanHtml = DOMPurify.sanitize(rawHtml, {
+        USE_PROFILES: { html: true, mathml: true },
         ADD_TAGS: [
           'math', 'annotation', 'semantics', 'mrow', 'msub', 'msup', 'msubsup', 'mover', 'munder', 'munderover',
           'mmultiscripts', 'mprec', 'mnext', 'mtable', 'mtr', 'mtd', 'mfrac', 'msqrt', 'mroot', 'mstyle', 'merror',
           'mpadded', 'mphantom', 'mfenced', 'menclose', 'ms', 'mglyph', 'maligngroup', 'malignmark', 'maction',
           'svg', 'path', 'use', 'span', 'div'
         ],
-        ADD_ATTR: ['id', 'target', 'xlink:href', 'class', 'style', 'aria-hidden', 'viewBox', 'd', 'fill', 'stroke', 'stroke-width', 'data-filename']
+        ADD_ATTR: [
+          'id', 'target', 'xlink:href', 'class', 'style', 'aria-hidden', 'viewBox', 'd', 'fill', 'stroke',
+          'stroke-width', 'data-filename', 'encoding', 'display'
+        ]
       })
 
       let processedHtml = cleanHtml
@@ -183,6 +205,24 @@ const ContentPanel = memo(({ chapter, onCodeClick, selectedTopicId, output, isRu
     }
   }, [chapter])
 
+  // Robust KaTeX rendering using auto-render (Post-processing)
+  useEffect(() => {
+    if (containerRef.current && renderedContent) {
+
+      renderMathInElement(containerRef.current, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '$', right: '$', display: false },
+          { left: '\\(', right: '\\)', display: false },
+          { left: '\\[', right: '\\]', display: true }
+        ],
+        throwOnError: false
+      })
+
+    }
+  }, [renderedContent])
+
+
   // Auto-scroll to topic when selectedTopicId changes
   useEffect(() => {
     if (selectedTopicId) {
@@ -236,9 +276,11 @@ const ContentPanel = memo(({ chapter, onCodeClick, selectedTopicId, output, isRu
         ) : (
           renderedContent ? (
             <div
+              ref={containerRef}
               className="markdown-body"
               dangerouslySetInnerHTML={{ __html: renderedContent }}
             />
+
           ) : (
             <div className="welcome-screen">
               <div className="welcome-card premium-welcome">

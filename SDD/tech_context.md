@@ -9,6 +9,7 @@
 - **建置工具**: **Vite 6.0** - 提供極速的 HMR 以及基於 Rollup 的生產環境優化。
 - **前端框架**: **React 18.3** - 採用併發模式 (Concurrent Mode) 與 Hooks (useState, useEffect, useMemo) 進行狀態管理。
 - **Python 引擎**: **Pyodide 0.26.4** - WebAssembly 版 Python 執行環境。
+- **套件管理與運維**: **uv** - 極速的 Python 套件管理器，用於驅動所有數據治理與維護腳本。
   - **核心版本**: Python 3.12.7 (注意：此版本起 `distutils` 已被正式移除)。
   - **CDN 載入源**: `https://cdn.jsdelivr.net/pyodide/v0.26.4/full/` (或本地 `/public/lib/pyodide/`)
 - **編輯器**: **Monaco Editor 4.6** - 透過 `@monaco-editor/react` 封裝，實現高效能代碼編輯功能。
@@ -17,8 +18,8 @@
 
 - **UI/UX**:
   - `Lucide React 0.460`: 向量圖示。
-  - `Marked 17.0` + `marked-katex-extension 5.1`: Markdown 與 LaTeX 渲染。
-  - `KaTeX 0.16`: 高速數學公式排版。
+  - `Marked 17.0`: Markdown 渲染。
+  - `KaTeX 0.16` + `auto-render contrib`: 高速數學公式排版與自動後處理渲染。
   - `react-syntax-highlighter 16.1`: 代碼片段語法高亮。
 - **安全性與效能**:
   - `DOMPurify 3.3`: XSS 入侵過濾。
@@ -29,14 +30,14 @@
 
 ### 1.3 數學渲染引擎 (Mathematical Rendering)
 
-- **KaTeX**: 採用 `Marked` + `marked-katex-extension` 的組合，並針對台灣使用習慣進行了特殊調校：
-  - **Inline Math**: 支援標準 `$...$` 行內數學公式 (需開啟 `nonStandard: true` 選項)。
-  - **Display Math**: 支援 `$$...$$` 區塊數學公式。
-  - **隔離實例 (Isolated Instance)**: 為了解決 SPA 與 HMR (熱模組替換) 環境下的狀態污染問題，`ContentPanel` 採用獨立的 `Marked` 實例而非全域單例。
-  - **JSON 轉義規範 (JSON Escaping Rule)**: 
-    - 由於內容存儲於 JSON 字串中，所有的 LaTeX 反斜線必須進行 **雙重轉義 (Double Escaping)**。
-    - 例如：`\\sigma` (正確) vs `\sigma` (錯誤，會導致 JSON Parse Error)。
-    - 建置腳本 (`merge_bodies.py`) 會在合併前進行語法檢查。
+- **KaTeX (Auto-render 模式)**: 專案採用 **後處理渲染 (Post-processing)** 策略，取代了原有的 `marked-katex-extension`：
+  - **核心機制**: 先使用 `Marked` 實例將 Markdown 轉為 HTML，待 DOM 節點渲染後，在 `useEffect` 中調用 `renderMathInElement` 進行全量掃描。
+  - **優點**: 徹底避開了 Markdown 解析器對 `\` (反斜線)、`_` (下標) 及 `$$` 的多重解析衝突，對於表格與 complex blocks 支援更佳。
+  - **Delimiters**: 支援 `$$...$$`, `$...$`, `\(...\)`, `\[...\]`。
+  - **JSON 轉義與冪等復原 (Idempotent Recovery Logic)**: 
+    - 由於內容存儲於 JSON 內，LaTeX 指令需符合雙重轉義。
+    - **核心演算法**: `ContentPanel.jsx` 採用了特殊的冪等正則表達式，能同時處理「遺漏反斜線」、「控制字元損壞 (如 `\x08` 誤作 `\b`)」以及「重複修復造成的雙重反斜線」。
+    - **範例**: `[\x08\\b]*egin\{` 會將 `begin`, `\begin`, `\x08egin`, `\b\begin` 等所有錯誤狀態強制規範化為唯一的 `\begin{`。
 
 ## 2. 系統架構細節 (System Architecture)
 
@@ -61,8 +62,8 @@
   - **核心索引**: `public/data/chapters_index.json` (~5KB) 提供基礎導航資訊。
   - **按需加載 (On-demand)**: 個別章節內容 `public/data/chapters_b2_ch{X}.json` 僅在使用者選取時加載，極大化啟動速度。
 - **數學渲染優化**:
-  - **Delimiters**: 移除前端冗餘的正則替換，完全信賴 `marked-katex-extension` 處理 `$` (Inline) 與 `$$` (Block)。
-  - **Aligned Blocks**: 確保 `aligned` 環境由 `$$` 包裹以實現區塊居中渲染。
+  - **區塊標準化**: 前處理器會自動將所有 `$$` 公式包裹在獨立的換行符中，確保 KaTeX 能準確識別為 Display Block 而非 Inline。
+  - **指令恢復**: 自動補齊損壞的 `\begin{aligned}`, `\frac`, `\right` 等關鍵語法。
 - **使用者狀態**:
   - `Theme`: 儲存於 `localStorage`。
   - `Code modification`: 使用者自定義修改後的代碼暫存於 IndexedDB (`localforage` 實作)。
@@ -137,12 +138,13 @@
 
 ## 4. 軟體建置與開發指令 (Commands)
 
-### 4.1 開發階段
+### 4.1 開發與數據治理階段 (Data Governance)
 
-- `npm run dev`: 啟動 Vite 開發伺服器。
-- `npm run build-chapters`: 掃描 Python 源文件夾並生成 JSON 索引。
-- `python scripts/merge_bodies.py <chapter_id>`: 合併單一章節的模組化內容。
-- `python scripts/consolidate_all.py`: **[發布]** 將所有模組化章節彙總至主檔案 `chapters.json`。
+- `uv run scripts/build-chapters.py`: **[核心]** 掃描 `modular/` 目錄，自動重構全書索引與章節 JSON。
+- `uv run scripts/update_examples.py`: **[同步]** 將本地 `.py` 範例源碼實時同步回生產數據庫。
+- `uv run scripts/limit_simulations.py`: **[治理]** 全自動注入 `__SIM_CAP` 運算規模保護機制。
+- `uv run scripts/audit_examples.py`: **[稽核]** 執行數據完整性校驗。
+- `node scripts/capture_preview.cjs`: **[視覺]** 自動擷取 PWA 章節預覽圖。
 
 ### 4.2 生產與部署
 

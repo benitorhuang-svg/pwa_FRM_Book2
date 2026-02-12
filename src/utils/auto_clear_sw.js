@@ -78,7 +78,7 @@ export async function autoClearSWOnce() {
             console.error('[AUTO-CLEAN] CLEANUP COMPLETE. FORCING RELOAD FROM SERVER.');
             window.location.reload(true);
         } catch (e) {
-            window.location.href = window.location.href; // Double fallback
+            window.location.replace(window.location.href); // Double fallback
         }
 
     } catch (err) {

@@ -10,35 +10,36 @@ import { captureAllPlots, initMatplotlib, ensurePlotsShown } from './utils/matpl
 
 // Module to package/wheel mapping for lazy loading
 const MODULE_MAPPING = {
-  // Common scientific packages (Pyodide built-ins)
-  'pandas': 'pandas',
-  'matplotlib': 'matplotlib',
-  'scipy': 'scipy',
-  'statsmodels': 'statsmodels',
-  'sympy': 'sympy',
-  'autograd': 'autograd',
-  'lxml': 'lxml',
-  'openpyxl': 'openpyxl',
-  'requests': 'requests',
-  'sklearn': 'scikit-learn',
-  'scikit-learn': 'scikit-learn',
-  // Micropip-installable packages (from PyPI)
+  'QuantLib': 'QuantLib',
   'arch': 'arch',
-  'plotly': 'plotly',
+  'autograd': 'autograd',
   'chart_studio': 'chart-studio',
+  'datetime': 'datetime',
+  'lxml': 'lxml',
+  'math': 'math',
+  'matplotlib': 'matplotlib',
   'mcint': 'mcint',
   'mibian': 'mibian',
-  'prettytable': 'prettytable',
-  'qpsolvers': 'qpsolvers',
-  'tabulate': 'tabulate',
-  // Local wheel files
-  'numpy_financial': 'wheels/numpy_financial-1.0.0-py3-none-any.whl',
-  'seaborn': 'wheels/seaborn-0.13.2-py3-none-any.whl',
-  'pymoo': 'wheels/pymoo-0.4.1-py3-none-any.whl',
-  'pandas_datareader': 'wheels/pandas_datareader-0.10.0-py3-none-any.whl',
-  'pyodide_http': 'wheels/pyodide_http-0.2.2-py3-none-any.whl',
   'mpl_toolkits': 'matplotlib',
-  'pylab': 'matplotlib'
+  'numpy': 'numpy',
+  'numpy_financial': 'wheels/numpy_financial-1.0.0-py3-none-any.whl',
+  'openpyxl': 'openpyxl',
+  'pandas': 'pandas',
+  'pandas_datareader': 'wheels/pandas_datareader-0.10.0-py3-none-any.whl',
+  'plotly': 'plotly',
+  'prettytable': 'prettytable',
+  'pylab': 'matplotlib',
+  'pymoo': 'wheels/pymoo-0.4.1-py3-none-any.whl',
+  'pyodide_http': 'wheels/pyodide_http-0.2.2-py3-none-any.whl',
+  'qpsolvers': 'qpsolvers',
+  'requests': 'requests',
+  'scikit-learn': 'scikit-learn',
+  'scipy': 'scipy',
+  'seaborn': 'wheels/seaborn-0.13.2-py3-none-any.whl',
+  'sklearn': 'scikit-learn',
+  'statsmodels': 'statsmodels',
+  'sympy': 'sympy',
+  'tabulate': 'tabulate',
 }
 
 // Dependencies for local wheels
@@ -120,7 +121,7 @@ function App() {
         // Fallback: attempt to recover from common "bad escaped character" issues
         try {
           // Heuristic: escape stray backslashes that are not part of a valid JSON escape
-          const sanitized = rawText.replace(/\\(?!["\\\/bfnrtu])/g, "\\\\")
+          const sanitized = rawText.replace(/\\(?!["\\/bfnrtu])/g, "\\\\")
           fullData = JSON.parse(sanitized)
         } catch (e) {
           throw new Error(`Failed to parse chapter data: ${e.message}`)

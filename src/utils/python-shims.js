@@ -567,3 +567,56 @@ def mcint_integrate(integrand, sampler, measure, n):
 mcint.integrate = mcint_integrate
 print("✅ mcint (Monte Carlo) shim installed.")
 `;
+
+export const ARCH_STUB = `
+# arch (Autoregressive Conditional Heteroskedasticity) stub
+import sys
+from types import ModuleType
+
+arch = ModuleType('arch')
+arch_univariate = ModuleType('arch.univariate')
+
+class ConstantMean:
+    def __init__(self, *args, **kwargs): pass
+    def fit(self, *args, **kwargs):
+        class FitRes:
+            def __init__(self): self.summary = lambda: "ARCH Stub: Models involving 'arch' are not supported in the browser."
+            def __getattr__(self, name): return lambda *args, **kwargs: None
+        return FitRes()
+
+arch_univariate.ConstantMean = ConstantMean
+arch_univariate.arch_model = lambda *args, **kwargs: ConstantMean()
+arch.arch_model = arch_univariate.arch_model
+
+sys.modules['arch'] = arch
+sys.modules['arch.univariate'] = arch_univariate
+print("✅ arch stub installed (browser fallback).")
+`;
+
+export const MIBIAN_STUB = `
+# mibian (Options Pricing) stub
+import sys
+from types import ModuleType
+
+mibian = ModuleType('mibian')
+
+class BS:
+    def __init__(self, *args, **kwargs):
+        self.callPrice = 0.0
+        self.putPrice = 0.0
+        self.callDelta = 0.0
+        self.putDelta = 0.0
+        self.callTheta = 0.0
+        self.putTheta = 0.0
+        self.callGamma = 0.0
+        self.putGamma = 0.0
+        self.vega = 0.0
+        self.impliedVolatility = 0.0
+
+mibian.BS = BS
+mibian.Me = BS
+mibian.GK = BS
+
+sys.modules['mibian'] = mibian
+print("✅ mibian stub installed (browser fallback).")
+`;

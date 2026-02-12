@@ -1,5 +1,5 @@
 // pyodide-loader.js (Book2)
-import { BASE_ENV_SETUP, PYMOO_SHIM, QUANTLIB_SHIM, PANDAS_DATAREADER_SHIM, SCIPY_RVS_SHIM, DATASET_SHIM, MCINT_SHIM, SCIPY_STUB } from './python-shims';
+import { BASE_ENV_SETUP, PYMOO_SHIM, QUANTLIB_SHIM, PANDAS_DATAREADER_SHIM, SCIPY_RVS_SHIM, DATASET_SHIM, MCINT_SHIM, SCIPY_STUB, ARCH_STUB, MIBIAN_STUB } from './python-shims';
 
 let pyodideInstance = null;
 let initializationPromise = null;
@@ -198,7 +198,9 @@ builtins.input = custom_input
                 pyodide.runPythonAsync(BASE_ENV_SETUP),
                 pyodide.runPythonAsync(DATASET_SHIM),
                 // Lightweight stubs for immediate use
-                pyodide.runPythonAsync(SCIPY_STUB) // We will load full scipy later
+                pyodide.runPythonAsync(SCIPY_STUB), // We will load full scipy later
+                pyodide.runPythonAsync(ARCH_STUB),
+                pyodide.runPythonAsync(MIBIAN_STUB)
             ]);
 
             pyodideInstance = pyodide;
@@ -233,10 +235,16 @@ export async function preloadHeavyPackages(pyodide) {
                 await pyodide.loadPackage(pkg);
             }
 
-            const pipPackages = ['arch', 'seaborn', 'numpy-financial', 'pandas-datareader', 'pyodide-http', 'chart_studio', 'mibian', 'plotly', 'prettytable', 'qpsolvers', 'tabulate'];
+            const pipPackages = ['seaborn', 'numpy-financial', 'pandas-datareader', 'pyodide-http', 'chart_studio', 'plotly', 'prettytable', 'qpsolvers', 'tabulate'];
             const micropip = pyodide.pyimport('micropip');
+
+            // Sequential but robust install
             for (const pkg of pipPackages) {
-                await micropip.install(pkg);
+                try {
+                    await micropip.install(pkg);
+                } catch (pkgErr) {
+                    console.warn(`[Background] Failed to preload ${pkg}:`, pkgErr);
+                }
             }
 
             await Promise.all([

@@ -109,7 +109,7 @@ export default defineConfig({
             if (id.includes('lucide-react')) {
               return 'vendor-icons';
             }
-            if (id.includes('katex') || id.includes('marked-katex-extension')) {
+            if (id.includes('katex')) {
               return 'vendor-katex';
             }
             if (id.includes('marked') || id.includes('dompurify') || id.includes('react-syntax-highlighter')) {

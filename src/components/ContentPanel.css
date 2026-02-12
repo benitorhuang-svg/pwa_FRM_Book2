@@ -415,16 +415,39 @@
   margin: 1.5rem 0;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0.5rem 0;
+  padding: 0.8rem 0;
+  max-width: 100%;
+  scrollbar-width: thin;
 }
 
+.markdown-body .katex-display > .katex {
+  max-width: 100%;
+  display: block;
+  text-align: center;
+}
+
+
 .markdown-body .katex {
-  font-size: 1.1em;
+  font-size: 1.05em;
+  text-indent: 0;
+  white-space: nowrap;
 }
 
 .markdown-body .katex-html {
   display: inline-block;
+  vertical-align: middle;
 }
+
+/* Base KaTeX vertical alignment fix */
+.markdown-body .katex .base {
+  vertical-align: middle;
+}
+
+/* Ensure math doesn't overflow parent container on small screens */
+.markdown-body .katex-display .katex-html {
+  display: block;
+}
+
 
 @keyframes spin {
   to {

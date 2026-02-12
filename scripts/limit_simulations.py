@@ -6,6 +6,7 @@ This script creates .bak backups before modifying files.
 It looks for common variables: MC_num, MC_sim_num, sim_num, sim_steps,
 and MC_num_list and inserts a small guard after each definition.
 """
+
 import re
 import json
 from pathlib import Path
@@ -76,20 +77,29 @@ def process_text(text: str) -> (str, int):
 def main():
     total = 0
     for g in PY_GLOBS:
-        for p in Path('.').glob(g):
+        for p in Path(".").glob(g):
             if p.is_dir():
                 continue
             try:
-                if p.suffix.lower() == '.json':
+                if p.suffix.lower() == ".json":
                     # parse JSON and process string fields that look like code
-                    j = json.loads(p.read_text(encoding='utf-8'))
+                    j = json.loads(p.read_text(encoding="utf-8"))
                     modified = False
 
                     def walk(obj):
                         nonlocal modified
                         if isinstance(obj, dict):
                             for k, v in obj.items():
-                                if isinstance(v, str) and any(token in v for token in ['MC_num', 'MC_sim_num', 'sim_num', 'sim_steps', 'sim_num_list']):
+                                if isinstance(v, str) and any(
+                                    token in v
+                                    for token in [
+                                        "MC_num",
+                                        "MC_sim_num",
+                                        "sim_num",
+                                        "sim_steps",
+                                        "sim_num_list",
+                                    ]
+                                ):
                                     new_v, inserts = process_text(v)
                                     if inserts:
                                         obj[k] = new_v
@@ -98,7 +108,16 @@ def main():
                                     walk(v)
                         elif isinstance(obj, list):
                             for i, item in enumerate(obj):
-                                if isinstance(item, str) and any(token in item for token in ['MC_num', 'MC_sim_num', 'sim_num', 'sim_steps', 'MC_num_list']):
+                                if isinstance(item, str) and any(
+                                    token in item
+                                    for token in [
+                                        "MC_num",
+                                        "MC_sim_num",
+                                        "sim_num",
+                                        "sim_steps",
+                                        "MC_num_list",
+                                    ]
+                                ):
                                     new_item, inserts = process_text(item)
                                     if inserts:
                                         obj[i] = new_item
@@ -108,24 +127,31 @@ def main():
 
                     walk(j)
                     if modified:
-                        bak = p.with_suffix('.json.bak')
+                        bak = p.with_suffix(".json.bak")
                         p.rename(bak)
-                        p.write_text(json.dumps(j, ensure_ascii=False, indent=2), encoding='utf-8')
-                        print(f'Updated {p} — inserted guards into JSON code fields; backup: {bak}')
+                        p.write_text(
+                            json.dumps(j, ensure_ascii=False, indent=2),
+                            encoding="utf-8",
+                        )
+                        print(
+                            f"Updated {p} — inserted guards into JSON code fields; backup: {bak}"
+                        )
                         total += 1
                 else:
-                    text = p.read_text(encoding='utf-8')
+                    text = p.read_text(encoding="utf-8")
                     new_text, inserts = process_text(text)
                     if inserts:
-                        bak = p.with_suffix(p.suffix + '.bak')
+                        bak = p.with_suffix(p.suffix + ".bak")
                         p.rename(bak)
-                        p.write_text(new_text, encoding='utf-8')
-                        print(f'Updated {p} — inserted {inserts} guard(s); backup: {bak}')
+                        p.write_text(new_text, encoding="utf-8")
+                        print(
+                            f"Updated {p} — inserted {inserts} guard(s); backup: {bak}"
+                        )
                         total += inserts
             except Exception:
                 continue
-    print(f'Done. Total guards inserted: {total}')
+    print(f"Done. Total guards inserted: {total}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
