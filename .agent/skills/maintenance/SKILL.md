@@ -153,32 +153,26 @@ git commit -m "backup: data before update_examples"
 
 - **腳本連結檢視:** 如需快速瀏覽腳本實作，請參考 `scripts/` 目錄下的對應檔案（例如 `scripts/build-chapters.py`、`scripts/update_examples.py`）。
 
-## 檔案格式檢查 (Format & Lint Checks)
+## 8. 檔案格式檢查 (Format & Lint Checks)
 
-為確保程式碼品質，當工作區有檔案修改時必須執行格式與靜態檢查：
+為確保程式碼品質，本專案提供自動化格式與靜態檢查工具。詳細說明與安裝指引請參考：
 
-- 前置套件:
-	- `eslint`（使用 npx 可臨時執行）
-	- `ruff`（由 `uv run ruff` 執行；請依專案慣例安裝）
+👉 **[FORMAT_AND_LINT_CHECKS.md](file:///c:/Users/benit/Desktop/FRM%20MATLAB/Python/pwa_Book2_python/.agent/skills/maintenance/FORMAT_AND_LINT_CHECKS.md)**
 
-- 快速執行（只在有修改檔案時運行）：
-
+### 快速執行
 ```powershell
 python scripts/run_format_checks.py
 ```
 
-- 行為說明：
-	- `scripts/run_format_checks.py` 會檢查 `git status --porcelain`，若有未提交或已修改檔案，會先執行 `npx eslint --ext .js,.jsx .`，再執行 `uv run ruff`。
-	- 若兩者皆通過，回傳成功；任一失敗會以非零 exit code 返回。
+### 核心行為
+- 自動偵測 `git status` 中的修改檔案。
+- 依序執行 `eslint` (JS/JSX) 與 `ruff` (Python)。
+- 具備多層級執行檔回退機制 (Fallback)，適應不同開發環境。
 
-- 建議整合：
-	- 把 `python scripts/run_format_checks.py` 加入 CI pipeline，或在本地開發流程（commit / pre-push）中呼叫；也可作為 git hook（pre-commit / pre-push）的一部分，以強制執行。
+---
+## 維護鏈條
+重大修改後建議遵循：`Code Sync` → `Load Balancing` → `Architecture Build` → `QA Audit` → `Format Check`
 
-範例 git hook（簡單 pre-push，在 `.git/hooks/pre-push` 中）:
-
-```bash
-#!/usr/bin/env bash
-python scripts/run_format_checks.py || { echo "Format/lint checks failed"; exit 1; }
-```
-
-（設定後記得 `chmod +x .git/hooks/pre-push`）
+## 補充建議
+- **回滾策略:** 在執行會改寫資料的腳本前，請利用 Git 或手動備份相關 JSON 檔案。
+- **維護優先:** 優先確保 `public/data/modular` 的源頭數據正確，再執行 `build-chapters.py` 進行同步。

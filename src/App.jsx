@@ -117,7 +117,7 @@ function App() {
       try {
         // Try to parse as JSON first
         fullData = JSON.parse(rawText)
-      } catch (jsonErr) {
+      } catch {
         // Fallback: attempt to recover from common "bad escaped character" issues
         try {
           // Heuristic: escape stray backslashes that are not part of a valid JSON escape
@@ -210,7 +210,7 @@ function App() {
       // Start loading heavy dependencies in the background
       // This won't block the UI, but will ensure they are ready when needed later
       preloadHeavyPackages(pyodide)
-        .then(() => console.log('Background initialization complete'))
+        .then(() => console.warn('Background initialization complete'))
         .catch(err => console.error('Background loaded failed', err))
     }
   }, [pyodide, loading])

@@ -3,9 +3,9 @@ import json
 import re
 
 # Paths
-SOURCE_BASE_DIR = r"c:\Users\benit\Desktop\FRM MATLAB\Python\Book2_手術刀般精準的FRM用Python科學管控財金風險_實戰篇\Book2_Python_Code"
+SOURCE_BASE_DIR = r"c:\Users\benit\Desktop\FRM MATLAB\Python\Book2_手術刀般精準的FRM用Python科學管控財金風險_實戰篇\Book2_Python_Code"  # noqa: E501
 TARGET_DATA_DIR = (
-    r"c:\Users\benit\Desktop\FRM MATLAB\Python\pwa_Book2_python\public\data"
+    r"c:\Users\benit\Desktop\FRM MATLAB\Python\pwa_Book2_python\public\data"  # noqa: E501
 )
 
 

@@ -24,7 +24,7 @@ for (const f of files) {
       continue;
     }
     fs.copyFileSync(f.src, f.dest);
-    console.log(`copied ${f.src} -> ${f.dest}`);
+    console.warn(`copied ${f.src} -> ${f.dest}`);
   } catch (err) {
     console.error('failed to copy', f.src, err);
     process.exitCode = 2;

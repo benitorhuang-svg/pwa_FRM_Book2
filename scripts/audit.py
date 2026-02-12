@@ -76,45 +76,61 @@ def audit_examples(data_dir: Path):
             missing = [x for x in expected_files if x not in actual_files]
 
             if missing:
-                print(f"[FAIL-MISSING] {chapter_id} ({chapter_title}): Missing {len(missing)} examples")
+                print(
+                    f"[FAIL-MISSING] {chapter_id} ({chapter_title}): Missing {len(missing)} examples"
+                )
                 for m in missing:
                     print(f"  - {m}")
             elif not expected_files:
                 # not necessarily an error
-                print(f"[WARN] {chapter_id}: No expected files found in scenarios table.")
+                print(
+                    f"[WARN] {chapter_id}: No expected files found in scenarios table."
+                )
 
             empty_code = []
-            for ex in (examples or []):
+            for ex in examples or []:
                 code = ex.get("code", "")
                 if not code or len(code.strip()) < 20:
                     empty_code.append(ex.get("filename", "Unknown"))
 
             if empty_code:
-                print(f"[FAIL-EMPTY] {chapter_id}: Found {len(empty_code)} examples with empty/short code.")
+                print(
+                    f"[FAIL-EMPTY] {chapter_id}: Found {len(empty_code)} examples with empty/short code."
+                )
                 for e in empty_code:
                     print(f"  - {e}")
 
             if not missing and not empty_code and expected_files:
-                print(f"[PASS] {chapter_id}: All {len(expected_files)} examples present and populated.")
+                print(
+                    f"[PASS] {chapter_id}: All {len(expected_files)} examples present and populated."
+                )
 
         except Exception as e:
             print(f"[ERROR] {path}: {e}")
 
 
-def deep_audit(base_dir: Path, data_dir: Path, out_file: Path, source_override: str = None):
+def deep_audit(
+    base_dir: Path, data_dir: Path, out_file: Path, source_override: str = None
+):
     print("Running deep audit (source -> JSON)...")
 
-    # Resolve source directory with priority: CLI override -> env BOOK2_SOURCE -> default sibling location -> common absolute from update_examples.py
+    # Resolve source directory with priority: CLI override -> env BOOK2_SOURCE -> default sibling location -> common absolute from update_examples.py  # noqa: E501
     if source_override:
         SOURCE_BASE = Path(source_override)
     elif os.environ.get("BOOK2_SOURCE"):
         SOURCE_BASE = Path(os.environ.get("BOOK2_SOURCE"))
     else:
-        SOURCE_BASE = base_dir / "Book2_手術刀般精準的FRM用Python科學管控財金風險_實戰篇" / "Book2_Python_Code"
+        SOURCE_BASE = (
+            base_dir
+            / "Book2_手術刀般精準的FRM用Python科學管控財金風險_實戰篇"
+            / "Book2_Python_Code"
+        )
 
     # fallback common absolute path used elsewhere in scripts
     if not SOURCE_BASE.exists():
-        fallback = Path(r"c:\Users\benit\Desktop\FRM MATLAB\Python\Book2_手術刀般精準的FRM用Python科學管控財金風險_實戰篇\Book2_Python_Code")
+        fallback = Path(
+            r"c:\Users\benit\Desktop\FRM MATLAB\Python\Book2_手術刀般精準的FRM用Python科學管控財金風險_實戰篇\Book2_Python_Code"  # noqa: E501
+        )
         if fallback.exists():
             SOURCE_BASE = fallback
 
@@ -156,7 +172,9 @@ def deep_audit(base_dir: Path, data_dir: Path, out_file: Path, source_override: 
         missing = [f for f in files if f not in existing_filenames]
         if missing:
             missing_report[ch_id] = {f: source_map[f] for f in missing}
-            print(f"[FAIL] {ch_id}: Missing {len(missing)} examples locally present in source.")
+            print(
+                f"[FAIL] {ch_id}: Missing {len(missing)} examples locally present in source."
+            )
             for m in missing:
                 print(f"  - {m}")
 
@@ -169,7 +187,9 @@ def deep_audit(base_dir: Path, data_dir: Path, out_file: Path, source_override: 
 def main():
     parser = argparse.ArgumentParser(description="Combined audit for pwa_Book2_python")
     parser.add_argument("--mode", choices=["examples", "deep", "all"], default="all")
-    parser.add_argument("--source", help="Path to Book2_Python_Code directory (overrides defaults)")
+    parser.add_argument(
+        "--source", help="Path to Book2_Python_Code directory (overrides defaults)"
+    )
     args = parser.parse_args()
 
     project_root = Path(__file__).resolve().parent.parent

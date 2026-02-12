@@ -107,7 +107,7 @@ export async function loadChapterDatasets(pyodide, chapterId) {
             let currentPath = '';
             for (const d of dirs) {
                 currentPath += '/' + d;
-                try { pyodide.FS.mkdir(currentPath); } catch (e) { /* ignore */ }
+                try { pyodide.FS.mkdir(currentPath); } catch { /* ignore */ }
             }
             pyodide.FS.writeFile(virtualPath, data);
         } catch (err) {

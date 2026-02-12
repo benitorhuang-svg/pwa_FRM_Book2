@@ -58,7 +58,7 @@ const ContentPanel = memo(({ chapter, onCodeClick, selectedTopicId, output, isRu
               if (bodyContent.trim().startsWith('{')) {
                 parsedBody = JSON.parse(bodyContent)
               }
-            } catch (e) {
+            } catch {
               // Ignore parse error, treat as regular string
             }
 
@@ -81,42 +81,63 @@ const ContentPanel = memo(({ chapter, onCodeClick, selectedTopicId, output, isRu
         ''
       )
 
-      // Pre-process for KaTeX: recover common corrupted delimiters and escapes
+      // Pre-process for KaTeX: Recover from corrupted escapes and standardize delimiters
+      /* eslint-disable no-control-regex */
       rawMarkdown = rawMarkdown
-        // Replace literal escaped-dollar-dollar sequences like "\\$$" -> "$$"
-        .replace(/\\+\$\$/g, '$$')
-        // Collapse sequences of multiple $ into a single $$
-        .replace(/\${3,}/g, '$$')
-        // Collapse repeated $$ separated only by whitespace or backslashes
-        .replace(/\$\$[\s\\]*\$\$/g, '$$')
+        // 1. Recover from "eaten" backslashes that became control characters
+        .replace(/\x08(?![e\\])/g, '\\b')
+        .replace(/\x0c(?![r\\])/g, '\\f')
+        .replace(/\x0b/g, '\\v')
+        .replace(/\r(?![ \n])/g, '\\r')
+
+        // 2. Idempotent recovery for common LaTeX commands
+        .replace(/[\x08]egin\{/g, '\\begin{')
+        .replace(/[\x08]eta/g, '\\beta')
+        .replace(/[\x0c]rac\{/g, '\\frac{')
+        .replace(/[\x09]ext\{/g, '\\text{')
+        .replace(/[\x09]heta/g, '\\theta')
+        .replace(/[\x09]au(?=\s|$|[^a-z])/g, '\\tau')
+      /* eslint-enable no-control-regex */
+
+      // 3. Normalize literal \n strings to real newlines (Defensive rendering for corrupted data)
+      rawMarkdown = rawMarkdown.replace(/\\n/g, '\n')
 
       // ── Protect math blocks from marked parsing ──
-      // Extract $$...$$ blocks BEFORE marked processes the markdown,
-      // so marked cannot split them into separate <p> tags.
       const mathBlocks = []
+
+      // 1. Display math: $$ ... $$
       rawMarkdown = rawMarkdown.replace(/\$\$([\s\S]*?)\$\$/g, (match, inner) => {
         const idx = mathBlocks.length
-        mathBlocks.push(inner)
-        return `%%MATHBLOCK_${idx}%%`
+        mathBlocks.push({ type: 'display', content: inner })
+        return ` @@MATH_BLOCK_${idx}@@ `
       })
 
-      let rawHtml = marked.parse(rawMarkdown)
-
-      // Re-insert math blocks after marked parsing
-      rawHtml = rawHtml.replace(/%%MATHBLOCK_(\d+)%%/g, (match, idx) => {
-        return `$$${mathBlocks[parseInt(idx)]}$$`
+      // 2. Aligned environments: \begin{aligned} ... \end{aligned}
+      rawMarkdown = rawMarkdown.replace(/\\begin\{aligned\}([\s\S]*?)\\end\{aligned\}/g, (match, inner) => {
+        const idx = mathBlocks.length
+        mathBlocks.push({ type: 'display', content: `\\begin{aligned}${inner}\\end{aligned}` })
+        return ` @@MATH_BLOCK_${idx}@@ `
       })
 
+      // 3. Inline math: $ ... $
+      // We only match if no newline is present to avoid matching multiple paragraphs
+      rawMarkdown = rawMarkdown.replace(/(?<!\\)\$([^$\n]+?)\$/g, (match, inner) => {
+        const idx = mathBlocks.length
+        mathBlocks.push({ type: 'inline', content: inner })
+        return ` @@MATH_BLOCK_${idx}@@ `
+      })
 
+      const rawHtml = marked.parse(rawMarkdown)
 
       // Inject IDs into <h3> tags for anchoring
-      rawHtml = rawHtml.replace(/<h3>(.*?)<\/h3>/g, (match, title) => {
+      let htmlWithIds = rawHtml.replace(/<h3>(.*?)<\/h3>/g, (match, title) => {
         const textOnly = title.replace(/<[^>]*>/g, '').trim()
         const id = 'topic-' + textOnly.replace(/\s+/g, '-').toLowerCase()
         return `<h3 id="${id}">${title}</h3>`
       })
 
-      const cleanHtml = DOMPurify.sanitize(rawHtml, {
+      // Sanitize the HTML first, while it still contains the placeholders
+      const cleanHtml = DOMPurify.sanitize(htmlWithIds, {
         USE_PROFILES: { html: true, mathml: true },
         ADD_TAGS: [
           'math', 'annotation', 'semantics', 'mrow', 'msub', 'msup', 'msubsup', 'mover', 'munder', 'munderover',
@@ -130,18 +151,29 @@ const ContentPanel = memo(({ chapter, onCodeClick, selectedTopicId, output, isRu
         ]
       })
 
-      let processedHtml = cleanHtml
+      // ── Re-insert math blocks after all other processing ──
       const scripts = chapter.examples || []
       const sortedScripts = [...scripts].sort((a, b) => b.filename.length - a.filename.length)
 
+      let finalHtml = cleanHtml
       sortedScripts.forEach((script) => {
         const escapedName = script.filename.replace('.', '\\.')
         const regex = new RegExp(`(?<!['".\\w])(${escapedName})(?!['".\\w])`, 'g')
 
-        processedHtml = processedHtml.replace(
+        finalHtml = finalHtml.replace(
           regex,
           `<span class="code-link" data-filename="${script.filename}">${script.filename}</span>`
         )
+      })
+
+      // Restoration happens last to ensure LaTeX integrity
+      const processedHtml = finalHtml.replace(/@@MATH_BLOCK_(\d+)@@/g, (match, idx) => {
+        const block = mathBlocks[parseInt(idx)]
+        if (block.type === 'display') {
+          return `\\[ ${block.content.trim()} \\]`
+        } else {
+          return `\\( ${block.content.trim()} \\)`
+        }
       })
 
       return processedHtml

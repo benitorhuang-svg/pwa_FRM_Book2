@@ -53,7 +53,7 @@ export class PerformanceMonitor {
     const emoji = duration < 100 ? '⚡' : duration < 1000 ? '⏱️' : '🐌'
     const color = duration < 100 ? 'color: green' : duration < 1000 ? 'color: orange' : 'color: red'
 
-    console.log(
+    console.warn(
       `%c${emoji} ${label}: ${duration.toFixed(2)}ms`,
       color
     )
@@ -152,18 +152,18 @@ export class PerformanceMonitor {
     const stats = this.getStats()
 
     console.group('📊 效能報告')
-    console.log(`總計測量: ${stats.count} 次`)
-    console.log(`總時間: ${stats.total.toFixed(2)}ms`)
-    console.log(`平均時間: ${stats.average.toFixed(2)}ms`)
-    console.log(`最快: ${stats.min.toFixed(2)}ms`)
-    console.log(`最慢: ${stats.max.toFixed(2)}ms`)
+    console.warn(`總計測量: ${stats.count} 次`)
+    console.warn(`總時間: ${stats.total.toFixed(2)}ms`)
+    console.warn(`平均時間: ${stats.average.toFixed(2)}ms`)
+    console.warn(`最快: ${stats.min.toFixed(2)}ms`)
+    console.warn(`最慢: ${stats.max.toFixed(2)}ms`)
     console.groupEnd()
 
     // 列出所有指標
     console.group('📋 詳細指標')
     Object.entries(this.metrics).forEach(([label, metric]) => {
       if (metric.duration !== null) {
-        console.log(`${label}: ${metric.duration.toFixed(2)}ms`)
+        console.warn(`${label}: ${metric.duration.toFixed(2)}ms`)
       }
     })
     console.groupEnd()
@@ -206,7 +206,7 @@ export function reportWebVitals() {
     const lcpObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries()
       const lastEntry = entries[entries.length - 1]
-      console.log('🎨 LCP:', lastEntry.renderTime || lastEntry.loadTime)
+      console.warn('🎨 LCP:', lastEntry.renderTime || lastEntry.loadTime)
     })
     lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
 
@@ -214,7 +214,7 @@ export function reportWebVitals() {
     const fidObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries()
       entries.forEach((entry) => {
-        console.log('⚡ FID:', entry.processingStart - entry.startTime)
+        console.warn('⚡ FID:', entry.processingStart - entry.startTime)
       })
     })
     fidObserver.observe({ entryTypes: ['first-input'] })
@@ -228,7 +228,7 @@ export function reportWebVitals() {
           clsScore += entry.value
         }
       })
-      console.log('📐 CLS:', clsScore)
+      console.warn('📐 CLS:', clsScore)
     })
     clsObserver.observe({ entryTypes: ['layout-shift'] })
   }

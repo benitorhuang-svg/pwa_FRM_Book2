@@ -46,7 +46,7 @@ const { chromium } = require('playwright');
     }
   });
 
-  console.log('Navigating to', url);
+  console.warn('Navigating to', url);
   await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
 
   // wait a bit for dynamic content
@@ -64,10 +64,10 @@ const { chromium } = require('playwright');
   fs.writeFileSync(consolePath, consoleLogs.join('\n'), 'utf8');
   fs.writeFileSync(networkPath, JSON.stringify(networkLogs, null, 2), 'utf8');
 
-  console.log('Saved:', screenshotPath);
-  console.log('Saved:', htmlPath);
-  console.log('Saved:', consolePath);
-  console.log('Saved:', networkPath);
+  console.warn('Saved:', screenshotPath);
+  console.warn('Saved:', htmlPath);
+  console.warn('Saved:', consolePath);
+  console.warn('Saved:', networkPath);
 
   await browser.close();
 })();

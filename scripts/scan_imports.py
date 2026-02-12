@@ -49,29 +49,35 @@ if __name__ == "__main__":
     # Attempt to update src/App.jsx MODULE_MAPPING automatically
     try:
         from pathlib import Path
+
         proj_root = Path(__file__).resolve().parent.parent
-        app_path = proj_root / 'src' / 'App.jsx'
+        app_path = proj_root / "src" / "App.jsx"
         if app_path.exists():
-            app_text = app_path.read_text(encoding='utf-8')
+            app_text = app_path.read_text(encoding="utf-8")
 
             # Find existing MODULE_MAPPING block
             import re
-            m = re.search(r"const\s+MODULE_MAPPING\s*=\s*\{(.*?)\}\s*\n", app_text, re.S)
+
+            m = re.search(
+                r"const\s+MODULE_MAPPING\s*=\s*\{(.*?)\}\s*\n", app_text, re.S
+            )
             existing_map = {}
             if m:
                 body = m.group(1)
                 # find 'key': 'value' pairs
-                for kv in re.finditer(r"['\"]([A-Za-z0-9_\-]+)['\"]\s*:\s*['\"]([^'\"]+)['\"]", body):
+                for kv in re.finditer(
+                    r"['\"]([A-Za-z0-9_\-]+)['\"]\s*:\s*['\"]([^'\"]+)['\"]", body
+                ):
                     k = kv.group(1)
                     v = kv.group(2)
                     existing_map[k] = v
 
             # preferred overrides for some common mappings
             overrides = {
-                'sklearn': 'scikit-learn',
-                'scikit_learn': 'scikit-learn',
-                'pylab': 'matplotlib',
-                'mpl_toolkits': 'matplotlib',
+                "sklearn": "scikit-learn",
+                "scikit_learn": "scikit-learn",
+                "pylab": "matplotlib",
+                "mpl_toolkits": "matplotlib",
             }
 
             # Merge: keep existing_map, add new imports -> map to itself or override
@@ -84,29 +90,35 @@ if __name__ == "__main__":
 
             # Build formatted mapping string (sorted keys)
             lines = []
-            lines.append('const MODULE_MAPPING = {')
+            lines.append("const MODULE_MAPPING = {")
             for k in sorted(merged.keys()):
                 v = merged[k]
                 lines.append(f"  '{k}': '{v}',")
-            lines.append('}')
-            new_mapping_block = '\n'.join(lines) + '\n\n'
+            lines.append("}")
+            new_mapping_block = "\n".join(lines) + "\n\n"
 
             # Replace the old block if present, otherwise insert near top after the comment
             if m:
-                new_app_text = app_text[: m.start()] + new_mapping_block + app_text[m.end():]
+                new_app_text = (
+                    app_text[: m.start()] + new_mapping_block + app_text[m.end() :]
+                )
             else:
                 # fallback: insert after the Module mapping comment if present
-                insert_after = re.search(r"// Module to package/wheel mapping for lazy loading", app_text)
+                insert_after = re.search(
+                    r"// Module to package/wheel mapping for lazy loading", app_text
+                )
                 if insert_after:
                     idx = insert_after.end()
-                    new_app_text = app_text[:idx] + '\n\n' + new_mapping_block + app_text[idx:]
+                    new_app_text = (
+                        app_text[:idx] + "\n\n" + new_mapping_block + app_text[idx:]
+                    )
                 else:
                     new_app_text = new_mapping_block + app_text
 
             # Backup and write
-            bak = app_path.with_suffix('.jsx.bak')
+            bak = app_path.with_suffix(".jsx.bak")
             app_path.replace(bak)
-            app_path.write_text(new_app_text, encoding='utf-8')
+            app_path.write_text(new_app_text, encoding="utf-8")
             print(f"Updated MODULE_MAPPING in {app_path} (backup: {bak.name})")
         else:
             print(f"App.jsx not found at expected path: {app_path}")

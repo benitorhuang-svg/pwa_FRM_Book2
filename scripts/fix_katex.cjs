@@ -18,7 +18,7 @@ const PANEL_PATH = path.join(PROJECT, 'src', 'components', 'ContentPanel.jsx');
 // Phase 1: Batch-repair corrupted JSON files
 // ═══════════════════════════════════════════════
 function phase1_fixJsonMath() {
-  console.log('═══ Phase 1: JSON 數據修復 ═══');
+  console.warn('═══ Phase 1: JSON 數據修復 ═══');
   let total = 0, fixed = 0, errors = 0;
 
   function walk(dir) {
@@ -36,7 +36,7 @@ function phase1_fixJsonMath() {
     if (lines.length <= 3) return;               // already clean
 
     const rel = path.relative(DATA_ROOT, filePath);
-    if (!raw.includes('"content"')) { console.log(`  ⏭ No content: ${rel}`); return; }
+    if (!raw.includes('"content"')) { console.warn(`  ⏭ No content: ${rel}`); return; }
 
     if (lines.length === 5) {
       let l2 = lines[1], l3 = lines[2], l4 = lines[3];
@@ -44,8 +44,8 @@ function phase1_fixJsonMath() {
       // Strip trailing \$$ from line 2
       if (l2.endsWith('\\$$')) l2 = l2.slice(0, -3);
 
-      // Fix \b (0x08) -> \\begin
-      l3 = l3.replace(/\x08egin\{/g, '\\\\begin{');
+      // Fix \b (0x08) -> \\\begin
+      l3 = l3.split(String.fromCharCode(8) + 'egin{').join('\\\\begin{');
       l3 = l3.replace(/^\\begin\{/g, '\\\\begin{');
 
       // Strip leading duplicated $$ from line 4
@@ -61,7 +61,7 @@ function phase1_fixJsonMath() {
         JSON.parse(result);
         fs.writeFileSync(filePath, result, 'utf8');
         fixed++;
-        console.log(`  ✅ ${rel}`);
+        console.warn(`  ✅ ${rel}`);
       } catch (e) {
         errors++;
         console.error(`  ❌ ${rel}: ${e.message}`);
@@ -70,18 +70,20 @@ function phase1_fixJsonMath() {
   }
 
   walk(DATA_ROOT);
-  console.log(`  📊 ${fixed} fixed, ${errors} errors, ${total} total\n`);
+  console.warn(`  📊 ${fixed} fixed, ${errors} errors, ${total} total\n`);
 }
 
 // ═══════════════════════════════════════════════
 // Phase 2: Rebuild ContentPanel.jsx math protection
 // ═══════════════════════════════════════════════
 function phase2_fixContentPanel() {
-  console.log('═══ Phase 2: ContentPanel.jsx 渲染邏輯重建 ═══');
+  console.warn('═══ Phase 2: ContentPanel.jsx 渲染邏輯重建 ═══');
 
   let content = fs.readFileSync(PANEL_PATH, 'utf8');
-  const startMarker = '      // Pre-process for KaTeX: Recover from corrupted escapes and standardize delimiters';
-  const endMarker = '      let rawHtml = marked.parse(rawMarkdown)';
+  // Locate a suitable insertion region. Match a flexible start marker containing
+  // the phrase "Pre-process for KaTeX" (case-sensitive) to support variations.
+  const startMarker = 'Pre-process for KaTeX';
+  const endMarker = 'let rawHtml = marked.parse(rawMarkdown)';
 
   const s = content.indexOf(startMarker);
   const e = content.indexOf(endMarker);
@@ -131,13 +133,13 @@ function phase2_fixContentPanel() {
 
   content = content.substring(0, s) + patch + content.substring(e + endMarker.length);
   fs.writeFileSync(PANEL_PATH, content, 'utf8');
-  console.log('  ✅ ContentPanel.jsx updated\n');
+  console.warn('  ✅ ContentPanel.jsx updated\n');
 }
 
 // ═══════════════════════════════════════════════
 // Main
 // ═══════════════════════════════════════════════
-console.log('🔧 KaTeX Unified Repair Tool\n');
+console.warn('🔧 KaTeX Unified Repair Tool\n');
 phase1_fixJsonMath();
 phase2_fixContentPanel();
-console.log('✅ Done.');
+console.warn('✅ Done.');

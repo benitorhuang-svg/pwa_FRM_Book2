@@ -8,8 +8,11 @@ Usage:
 This script checks `git status --porcelain` for any modified/added files
 and will execute ESLint (via npx) and `uv run ruff` when changes are present.
 """
+
 import subprocess
 import sys
+import shutil
+import os
 
 
 def git_has_changes():
@@ -29,6 +32,9 @@ def run_cmd(cmd):
     except subprocess.CalledProcessError as e:
         print(f"Command failed (exit {e.returncode}):", " ".join(cmd))
         return e.returncode
+    except FileNotFoundError as e:
+        print(f"Command not found: {cmd[0]} — skipping: {e}")
+        return 127
 
 
 def main():
@@ -36,12 +42,37 @@ def main():
         print("No modified files detected — skipping eslint and ruff.")
         return 0
 
-    # ESLint (use npx to avoid global deps)
-    eslint_cmd = ["npx", "eslint", "--ext", ".js,.jsx", "."]
-    code = run_cmd(eslint_cmd)
+    # ESLint: prefer local node_modules/.bin, then npx, then global eslint
+    eslint_cmd = None
+    local_eslint = os.path.join("node_modules", ".bin", "eslint")
+    if os.name == "nt":
+        local_eslint = local_eslint + ".cmd"
 
-    # Ruff via uv wrapper (project uses `uv run ruff` convention)
-    ruff_cmd = ["uv", "run", "ruff"]
+    if os.path.isfile(local_eslint):
+        eslint_cmd = [local_eslint, "--ext", ".js,.jsx", "."]
+    elif shutil.which("npx"):
+        eslint_cmd = ["npx", "eslint", "--ext", ".js,.jsx", "."]
+    elif shutil.which("eslint"):
+        eslint_cmd = ["eslint", "--ext", ".js,.jsx", "."]
+    else:
+        print(
+            "eslint not available (no npx/eslint in PATH, and no local node_modules/.bin). Skipping eslint."
+        )
+
+    code = 0
+    if eslint_cmd:
+        code = run_cmd(eslint_cmd)
+
+    # Ruff: prefer `ruff` CLI with a check command, then `uv run ruff`, then `python -m ruff`
+    ruff_cmd = None
+    if shutil.which("ruff"):
+        ruff_cmd = ["ruff", "check", "."]
+    elif shutil.which("uv"):
+        ruff_cmd = ["uv", "run", "ruff", "check", "."]
+    else:
+        # try as module
+        ruff_cmd = [sys.executable, "-m", "ruff", "check", "."]
+
     code2 = run_cmd(ruff_cmd)
 
     if code != 0 or code2 != 0:

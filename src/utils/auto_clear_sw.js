@@ -21,23 +21,23 @@ export async function autoClearSWOnce() {
         try {
             const regs = await navigator.serviceWorker.getRegistrations();
             await Promise.all(regs.map(r => {
-                console.log('[AUTO-CLEAN] Unregistering:', r.scope);
+                console.warn('[AUTO-CLEAN] Unregistering:', r.scope);
                 return r.unregister().catch(() => { });
             }));
-            console.info('[AUTO-CLEAN] serviceWorker registrations unregistered.');
+            console.warn('[AUTO-CLEAN] serviceWorker registrations unregistered.');
         } catch (e) {
             console.warn('[AUTO-CLEAN] Failed to unregister service workers', e);
         }
 
         // Clear Cache Storage
         try {
-            if ('caches' in window) {
+                if ('caches' in window) {
                 const keys = await caches.keys();
                 await Promise.all(keys.map(k => {
-                    console.log('[AUTO-CLEAN] Deleting Cache:', k);
+                    console.warn('[AUTO-CLEAN] Deleting Cache:', k);
                     return caches.delete(k).catch(() => { });
                 }));
-                console.info('[AUTO-CLEAN] CacheStorage cleared:', keys);
+                console.warn('[AUTO-CLEAN] CacheStorage cleared:', keys);
             }
         } catch (e) {
             console.warn('[AUTO-CLEAN] Failed to clear CacheStorage', e);
@@ -48,12 +48,12 @@ export async function autoClearSWOnce() {
             if ('databases' in indexedDB) {
                 const dbs = await indexedDB.databases();
                 await Promise.all(dbs.map(d => indexedDB.deleteDatabase(d.name).catch(() => { })));
-                console.info('[AUTO-CLEAN] IndexedDB databases deleted:', dbs.map(d => d.name));
+                console.warn('[AUTO-CLEAN] IndexedDB databases deleted:', dbs.map(d => d.name));
             } else {
                 // Fallback: attempt to delete common names used by Pyodide/emscripten
                 const candidates = ['pyodide', 'emscripten-archives', 'idb-filesystem', 'file_storage', 'workbox-precache-v2'];
                 await Promise.all(candidates.map(n => indexedDB.deleteDatabase(n).catch(() => { })));
-                console.info('[AUTO-CLEAN] IndexedDB fallback delete attempted for candidates.');
+                console.warn('[AUTO-CLEAN] IndexedDB fallback delete attempted for candidates.');
             }
         } catch (e) {
             console.warn('[AUTO-CLEAN] Failed to clear IndexedDB', e);
@@ -65,7 +65,7 @@ export async function autoClearSWOnce() {
             localStorage.clear();
             sessionStorage.clear();
             if (theme) localStorage.setItem('theme', theme);
-            console.info('[AUTO-CLEAN] localStorage and sessionStorage cleared (theme preserved).');
+            console.warn('[AUTO-CLEAN] localStorage and sessionStorage cleared (theme preserved).');
         } catch (e) {
             console.warn('[AUTO-CLEAN] Failed to clear storage', e);
         }
@@ -77,7 +77,7 @@ export async function autoClearSWOnce() {
         try {
             console.error('[AUTO-CLEAN] CLEANUP COMPLETE. FORCING RELOAD FROM SERVER.');
             window.location.reload(true);
-        } catch (e) {
+        } catch {
             window.location.replace(window.location.href); // Double fallback
         }
 
