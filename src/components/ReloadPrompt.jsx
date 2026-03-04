@@ -9,7 +9,7 @@ function ReloadPrompt() {
         updateServiceWorker,
     } = useRegisterSW({
         onRegisteredSW(swUrl, r) {
-            console.warn(`Service Worker at: ${swUrl}`)
+            console.debug(`Service Worker at: ${swUrl}`)
             if (r) {
                 setInterval(() => {
                     r.update()
