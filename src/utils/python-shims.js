@@ -135,6 +135,11 @@ class QLYieldCurve:
         d = ql.Settings.instance().evaluationDate or QLDate(15,1,2020)
         return [d + 90, d + 180, d + 365, d + 730, d + 1095]
     def zeroRate(self, yrs, compounding, freq): return QLZeroRate(0.05 + 0.005 * yrs)
+    def enableExtrapolation(self): pass
+    def discount(self, t):
+        r = 0.05
+        dt = float(t) if isinstance(t, (int, float)) else 1.0
+        return np.exp(-r * dt)
 
 ql.ZeroCurve = lambda *args: QLYieldCurve()
 ql.PiecewiseLogCubicDiscount = lambda *args: QLYieldCurve()

@@ -141,9 +141,23 @@ export async function initMatplotlib(pyodide, interactive = false) {
     await pyodide.runPythonAsync(`
 import matplotlib
 import matplotlib.pyplot as plt
+import warnings
 matplotlib.use('${backend}')
 if plt.style.available and 'default' in plt.style.available:
     plt.style.use('default')
+
+# Suppress plt.show() agg backend warnings & font-not-found warnings
+warnings.filterwarnings('ignore', message='.*Matplotlib is currently using agg.*')
+warnings.filterwarnings('ignore', message='.*Glyph.*missing from font.*')
+import logging
+logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
+
+# Replace Times New Roman with DejaVu Sans (available in Pyodide)
+import matplotlib.font_manager as fm
+_available = {f.name for f in fm.fontManager.ttflist}
+if 'Times New Roman' not in _available:
+    plt.rcParams['font.family'] = 'DejaVu Sans'
+    plt.rcParams['font.serif'] = ['DejaVu Serif', 'DejaVu Sans']
     `)
 
     // Matplotlib initialized successfully
