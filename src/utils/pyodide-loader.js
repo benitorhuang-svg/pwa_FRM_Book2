@@ -1,5 +1,5 @@
 // pyodide-loader.js (Book2)
-import { BASE_ENV_SETUP, PYMOO_SHIM, PANDAS_DATAREADER_SHIM, SCIPY_RVS_SHIM, DATASET_SHIM, MCINT_SHIM, SCIPY_STUB, ARCH_STUB, MIBIAN_STUB } from './python-shims';
+import { BASE_ENV_SETUP, PYMOO_SHIM, PANDAS_DATAREADER_SHIM, SCIPY_RVS_SHIM, DATASET_SHIM, MCINT_SHIM, SCIPY_STUB, ARCH_STUB, MIBIAN_STUB, QPSOLVERS_SHIM } from './python-shims';
 
 let pyodideInstance = null;
 let initializationPromise = null;
@@ -76,8 +76,7 @@ const DATASET_REGISTRY = {
         { filename: 'EE.csv', displayPath: 'datasets/b2_ch10/EE.csv' }
     ],
     'b2_ch11': [
-        { filename: 'Data_portfolio_1.xlsx', displayPath: 'B2_Ch11/Data_portfolio_1.xlsx' },
-        { filename: 'Data_portfolio_2.xlsx', displayPath: 'B2_Ch11/Data_portfolio_2.xlsx' }
+        { filename: 'Data_portfolio_1.xlsx', displayPath: 'B2_Ch11/Data_portfolio_1.xlsx' }
     ],
     'b2_ch12': [
         { filename: 'Data_portfolio_1.xlsx', displayPath: 'B2_Ch12/Data_portfolio_1.xlsx' },
@@ -105,6 +104,10 @@ export async function loadChapterDatasets(pyodide, chapterId) {
             const fetchUrl = `${import.meta.env.BASE_URL}data/datasets/${normalizedId}/${filename}`;
             const response = await fetch(fetchUrl);
             if (!response.ok) continue;
+
+            // Guard: reject HTML responses masquerading as data files (SPA fallback)
+            const ct = (response.headers.get('content-type') || '').toLowerCase();
+            if (ct.includes('text/html')) continue;
 
             const arrayBuffer = await response.arrayBuffer();
             const data = new Uint8Array(arrayBuffer);
@@ -253,6 +256,7 @@ builtins.input = custom_input
             await runShim(ARCH_STUB, 'ARCH_STUB', { timeoutMs: 15000 });
             await runShim(MIBIAN_STUB, 'MIBIAN_STUB', { timeoutMs: 15000 });
             await runShim(MCINT_SHIM, 'MCINT_SHIM', { timeoutMs: 15000 });
+            await runShim(QPSOLVERS_SHIM, 'QPSOLVERS_SHIM', { timeoutMs: 15000 });
 
             // QuantLib shim is large; inject on-demand when user code imports it (see App.jsx ensureDependencies)
 
@@ -304,7 +308,8 @@ export async function preloadHeavyPackages(pyodide) {
                 pyodide.runPythonAsync(SCIPY_RVS_SHIM),
                 pyodide.runPythonAsync(PYMOO_SHIM),
                 pyodide.runPythonAsync(PANDAS_DATAREADER_SHIM),
-                pyodide.runPythonAsync(MCINT_SHIM)
+                pyodide.runPythonAsync(MCINT_SHIM),
+                pyodide.runPythonAsync(QPSOLVERS_SHIM)
             ]);
 
             isHeavyLoaded = true;

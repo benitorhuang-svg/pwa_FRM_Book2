@@ -649,6 +649,73 @@ except Exception:
     print('✅ SciPy stub installed.')
 `;
 
+export const QPSOLVERS_SHIM = `
+# qpsolvers fallback shim for browser environments without native solver backends
+try:
+    import numpy as _np
+    from scipy.optimize import minimize as _minimize, LinearConstraint as _LinearConstraint
+
+    def _fallback_solve_qp(P, q, G=None, h=None, A=None, b=None, solver=None, **kwargs):
+        Pm = _np.asarray(P, dtype=float)
+        qv = _np.asarray(q, dtype=float).reshape(-1)
+        n = int(qv.shape[0])
+
+        def _obj(x):
+            return 0.5 * float(x @ Pm @ x) + float(qv @ x)
+
+        def _jac(x):
+            return Pm @ x + qv
+
+        constraints = []
+
+        if A is not None and b is not None:
+            Am = _np.atleast_2d(_np.asarray(A, dtype=float))
+            bv = _np.asarray(b, dtype=float).reshape(-1)
+            constraints.append(_LinearConstraint(Am, bv, bv))
+
+        if G is not None and h is not None:
+            Gm = _np.atleast_2d(_np.asarray(G, dtype=float))
+            hv = _np.asarray(h, dtype=float).reshape(-1)
+            constraints.append(_LinearConstraint(Gm, -_np.inf * _np.ones_like(hv), hv))
+
+        x0 = _np.ones(n, dtype=float) / max(1, n)
+        res = _minimize(_obj, x0, jac=_jac, method='SLSQP', constraints=constraints, options={'maxiter': 1000, 'ftol': 1e-9})
+
+        if not res.success:
+            res = _minimize(_obj, x0, method='SLSQP', constraints=constraints, options={'maxiter': 2000, 'ftol': 1e-8})
+
+        return _np.asarray(res.x, dtype=float) if res.success else None
+
+    try:
+        import qpsolvers as _qps
+        _orig_solve_qp = getattr(_qps, 'solve_qp', None)
+
+        def _patched_solve_qp(P, q, G=None, h=None, A=None, b=None, solver=None, **kwargs):
+            if _orig_solve_qp is not None and solver is not None:
+                try:
+                    return _orig_solve_qp(P, q, G, h, A, b, solver=solver, **kwargs)
+                except Exception:
+                    pass
+            return _fallback_solve_qp(P, q, G, h, A, b, solver=solver, **kwargs)
+
+        _qps.solve_qp = _patched_solve_qp
+        print('✅ qpsolvers shim: solve_qp fallback enabled.')
+    except Exception:
+        import sys
+        from types import ModuleType
+
+        qps = ModuleType('qpsolvers')
+
+        def solve_qp(P, q, G=None, h=None, A=None, b=None, solver=None, **kwargs):
+            return _fallback_solve_qp(P, q, G, h, A, b, solver=solver, **kwargs)
+
+        qps.solve_qp = solve_qp
+        sys.modules['qpsolvers'] = qps
+        print('✅ qpsolvers shim: lightweight module injected.')
+except Exception as _e:
+    print(f'⚠️ qpsolvers shim failed: {_e}')
+`;
+
 export const BASE_ENV_SETUP = `
 import warnings
 warnings.simplefilter("ignore", DeprecationWarning)
