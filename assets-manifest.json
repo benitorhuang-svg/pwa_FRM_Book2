@@ -247,13 +247,13 @@
     "hash": "f01f3e87d9c6a61c0c081ceb577abd864eb00a612f7ac1620dd6915fad2ef5aa",
     "size": 27556
   },
+  "assets/index-B-bfthNp.js": {
+    "hash": "f9cb62a63e9c6ee9f91912a923892cd9e5b3e22ffd9aed106c77a11d969eb3d3",
+    "size": 82825
+  },
   "assets/index-B5sKPdfz.css": {
     "hash": "35173fe06aefe8f8225933a6fad3942edd116f05fb41646d0a950e786ed031b2",
     "size": 23957
-  },
-  "assets/index-glxwWQNH.js": {
-    "hash": "2eeb52e8550fd366c13895a14aaec339dcabc1331cf433d3d4bebcba13b2c84a",
-    "size": 80201
   },
   "assets/vendor-B3CQIlJd.js": {
     "hash": "88cc02de950f2d1bd00ffe93b8a12259ee5a55913402baf2cedced6340fe7adc",
@@ -292,12 +292,12 @@
     "size": 19626
   },
   "data/chapters_b2_ch11.json": {
-    "hash": "7680bcee556faa303c54de36054666e55237dc3e8c69995348301454cc7bbb59",
-    "size": 28947
+    "hash": "0193c041acbaf395c653ffb8cc0997c9f997ee3998ebebf61935cac202ad6610",
+    "size": 29012
   },
   "data/chapters_b2_ch12.json": {
-    "hash": "2544ca52f7e523721085e35f92eefff0c0320ce3e91e5c3643aa336362f003e8",
-    "size": 23761
+    "hash": "79b84346320317da10a5807b2a31ce383801e0c15374828aaf96e6e7c0927a37",
+    "size": 23803
   },
   "data/chapters_b2_ch2.json": {
     "hash": "22f56d1da63d58b21b65ef13bcb4c4ad3cd4dd767fd1be3dc9b3bf283244eee6",
@@ -312,24 +312,24 @@
     "size": 26833
   },
   "data/chapters_b2_ch5.json": {
-    "hash": "3842dec503310bb148465f3fcfa21a058cb15dd5264f000099ee82abb76056bb",
-    "size": 45042
+    "hash": "c1e32bd0bdcd6f707cf0c639598105e90cb061913195ae279a704ce35f9d7e85",
+    "size": 45039
   },
   "data/chapters_b2_ch6.json": {
     "hash": "b63686d92d769e97880d529cb0c20eec556fc632882b0345f1b7b6fa983fbf15",
     "size": 27331
   },
   "data/chapters_b2_ch7.json": {
-    "hash": "7a1fdc010146fe27d36ff3121469c617259305839c9c4128cccb0906625dd493",
-    "size": 27993
+    "hash": "0e9fcbc81e98106f506cd5f5aa2e029048916304a1348ee1d2a312df3a9c4e8f",
+    "size": 27999
   },
   "data/chapters_b2_ch8.json": {
     "hash": "7926d6dcf1d5fc2828ec1612ef708472af9041d86ffa5eecb16605b3ee68de7a",
     "size": 15109
   },
   "data/chapters_b2_ch9.json": {
-    "hash": "58d436a8e107bbe2c4584275dbe06f527d5c5c63470578e10a64c7cf9efd8add",
-    "size": 23638
+    "hash": "a1b1e80b86e1f07031819729d22bd144f2d0956108d4cddec4ffb4a187856c96",
+    "size": 24098
   },
   "data/chapters_index.json": {
     "hash": "cb226fbb7f6070b1e0bee46f6fdfa684516e03aa0788f4acc4f16554de0029a8",
@@ -752,7 +752,7 @@
     "size": 14669
   },
   "index.html": {
-    "hash": "5716885446dc47cc81921c9da60901cd6ae6d008cce83c99defa237ee09dcfe7",
+    "hash": "c966e42ce021bdb2e1d1db66ef38508a9d6ff0b86246fdf55cdf0afc9a3e7da4",
     "size": 2513
   },
   "manifest.webmanifest": {
@@ -764,7 +764,7 @@
     "size": 187568
   },
   "sw.js": {
-    "hash": "62ff6f75ae2abc15342f0c2c5173fd2d96dec7f9977c0f48a55608c0160b1921",
+    "hash": "9d425e278ede426c12e299cb5233e3deb0e4f553a17fa72447e8098d559df5b6",
     "size": 27882
   },
   "welcome.jpg": {
