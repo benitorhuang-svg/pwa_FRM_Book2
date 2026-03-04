@@ -424,9 +424,16 @@ class QLMersenneTwisterUniformRng:
         self._rng = __import__('random').Random(seed)
     def next(self):
         class Res:
-            def __init__(self, v): self.value = v
-        return Res(self._rng.random())
+            def __init__(self, v): self._v = v
+            @property
+            def value(self): return self._v
+            def __call__(self): return self._v
+        r = Res(self._rng.random())
+        return r
 ql.MersenneTwisterUniformRng = QLMersenneTwisterUniformRng
+
+class _CallableList(list):
+    def __call__(self): return list(self)
 
 class QLMersenneTwisterUniformRsg:
     def __init__(self, dim, rng):
@@ -434,7 +441,7 @@ class QLMersenneTwisterUniformRsg:
         self._rng = rng
     def nextSequence(self):
         class Seq:
-            def __init__(self, vals): self.value = vals
+            def __init__(self, vals): self.value = _CallableList(vals)
         return Seq([self._rng.next().value for _ in range(self._dim)])
     def dimension(self): return self._dim
 ql.MersenneTwisterUniformRsg = QLMersenneTwisterUniformRsg
@@ -447,7 +454,7 @@ class QLInvCumulativeGaussianRsg:
         seq = self._rsg.nextSequence()
         vals = [float(_st.norm.ppf(max(1e-10, min(1-1e-10, u)))) for u in seq.value]
         class Seq:
-            def __init__(self, v): self.value = v
+            def __init__(self, v): self.value = _CallableList(v)
         return Seq(vals)
 ql.InvCumulativeMersenneTwisterGaussianRsg = QLInvCumulativeGaussianRsg
 
