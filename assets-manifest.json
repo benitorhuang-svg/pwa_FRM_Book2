@@ -247,13 +247,13 @@
     "hash": "f01f3e87d9c6a61c0c081ceb577abd864eb00a612f7ac1620dd6915fad2ef5aa",
     "size": 27556
   },
+  "assets/index-7jnMX2tA.js": {
+    "hash": "927a84f18cb2eddb70be40de577556e887d3424ada22e9509fe4996acee43cdd",
+    "size": 83691
+  },
   "assets/index-B5sKPdfz.css": {
     "hash": "35173fe06aefe8f8225933a6fad3942edd116f05fb41646d0a950e786ed031b2",
     "size": 23957
-  },
-  "assets/index-D_Bfprc8.js": {
-    "hash": "87b5362301013ff7e22a3fdc4a0fec350911e61ddfc8dba532183069f7df8c45",
-    "size": 85680
   },
   "assets/vendor-B3CQIlJd.js": {
     "hash": "88cc02de950f2d1bd00ffe93b8a12259ee5a55913402baf2cedced6340fe7adc",
@@ -288,8 +288,8 @@
     "size": 20970
   },
   "data/chapters_b2_ch10.json": {
-    "hash": "2e3a00d2e5055539509f0dbfb8eb88893d9275c2952795036f770dc93c3f90b6",
-    "size": 19626
+    "hash": "082750a8fd1e5253916d23d9fc142cea8f41bd8ef2dadd10903fb7cfaaacc747",
+    "size": 19713
   },
   "data/chapters_b2_ch11.json": {
     "hash": "0193c041acbaf395c653ffb8cc0997c9f997ee3998ebebf61935cac202ad6610",
@@ -752,7 +752,7 @@
     "size": 14669
   },
   "index.html": {
-    "hash": "912149316418a6460f652e18e68e23381101078f8ed496eee434809cf356f8ff",
+    "hash": "654832cc576c0dfe725c3d855c3b48b29b3c1b428566b7fe80d03a693952de5b",
     "size": 1953
   },
   "manifest.webmanifest": {
@@ -764,7 +764,7 @@
     "size": 187568
   },
   "sw.js": {
-    "hash": "62f65b6e204d0a26229757ab7a742c7a1c20b9feed21a80704e6d454f5387e73",
+    "hash": "4dca8df75ed99c10c83f57223bfb16076da1ae044df39096ece51a00a93e2e89",
     "size": 27882
   },
   "welcome.jpg": {
