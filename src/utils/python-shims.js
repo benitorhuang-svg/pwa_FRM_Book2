@@ -103,7 +103,21 @@ class Settings:
     def instance(cls):
         if cls._inst is None: cls._inst = cls()
         return cls._inst
-    evaluationDate = None
+    def __init__(self):
+        object.__setattr__(self, '_evaluationDate', None)
+    @property
+    def evaluationDate(self):
+        return self._evaluationDate
+    @evaluationDate.setter
+    def evaluationDate(self, val):
+        object.__setattr__(self, '_evaluationDate', val)
+    def setEvaluationDate(self, date):
+        object.__setattr__(self, '_evaluationDate', date)
+    def __setattr__(self, name, value):
+        if name in ('evaluationDate', 'setEvaluationDate'):
+            object.__setattr__(self, '_evaluationDate', value)
+        else:
+            object.__setattr__(self, name, value)
 ql.Settings = Settings
 
 class QLDayCount:
