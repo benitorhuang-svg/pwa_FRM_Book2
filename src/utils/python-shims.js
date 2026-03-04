@@ -38,7 +38,13 @@ class QLDate:
             return QLDate(new_dt.day, new_dt.month, new_dt.year)
         elif hasattr(other, 'units'): # QLPeriod
             val = other.value
-            if other.units == "Months":
+            if other.units == "Days":
+                new_dt = self.dt + datetime.timedelta(days=val)
+                return QLDate(new_dt)
+            elif other.units == "Weeks":
+                new_dt = self.dt + datetime.timedelta(weeks=val)
+                return QLDate(new_dt)
+            elif other.units == "Months":
                 new_dt = self.dt + datetime.timedelta(days=val * 30)
                 return QLDate(new_dt)
             elif other.units == "Years":
@@ -51,6 +57,13 @@ class QLDate:
             return (self.dt - other.dt).days
         return 0
 
+    def __lt__(self, other): return self.dt < (other.dt if hasattr(other, 'dt') else other)
+    def __le__(self, other): return self.dt <= (other.dt if hasattr(other, 'dt') else other)
+    def __gt__(self, other): return self.dt > (other.dt if hasattr(other, 'dt') else other)
+    def __ge__(self, other): return self.dt >= (other.dt if hasattr(other, 'dt') else other)
+    def __eq__(self, other): return self.dt == (other.dt if hasattr(other, 'dt') else other)
+    def __ne__(self, other): return not self.__eq__(other)
+    def __hash__(self): return hash(self.dt)
     def __str__(self): return self.dt.strftime('%B %d, %Y')
     def __repr__(self): return self.__str__()
     def date(self): return self
@@ -58,9 +71,20 @@ class QLDate:
 ql.Date = QLDate
 
 class QLPeriod:
+    _UNIT_MAP = {'d': 'Days', 'w': 'Weeks', 'm': 'Months', 'y': 'Years'}
     def __init__(self, value, units=None):
-        self.value = value
-        self.units = units
+        if isinstance(value, str) and units is None:
+            import re as _re
+            m = _re.match(r'(\\d+)\\s*([dwmyDWMY])', value)
+            if m:
+                self.value = int(m.group(1))
+                self.units = self._UNIT_MAP.get(m.group(2).lower(), 'Days')
+            else:
+                self.value = 0
+                self.units = 'Days'
+        else:
+            self.value = value
+            self.units = units
 ql.Period = QLPeriod
 ql.Months = "Months"
 ql.Years = "Years"
