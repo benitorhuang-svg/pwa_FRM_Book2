@@ -230,6 +230,184 @@ ql.Callability.Call = "Call"
 ql.Callability.Put = "Put"
 ql.CallableFixedRateBond = FixedRateBond
 
+# ─── Ch10_5 extensions: CVA via GSR model + MC simulation ───
+
+ql.Actual365Fixed = QLDayCount
+ql.Thirty360.BondBasis = "BondBasis"
+ql.ModifiedFollowing = "ModifiedFollowing"
+
+class QLTarget:
+    def advance(self, date, period):
+        return date + period
+ql.TARGET = QLTarget
+
+class QLEuribor6M:
+    def __init__(self, handle=None):
+        self._handle = handle
+        self._fixings = {}
+    def tenor(self): return QLPeriod(6, "Months")
+    def fixingCalendar(self): return QLTarget()
+    def businessDayConvention(self): return "ModifiedFollowing"
+    def dayCounter(self): return QLDayCount()
+    def fixingDate(self, d): return d
+    def isValidFixingDate(self, d): return True
+    def fixing(self, d):
+        k = str(d)
+        return self._fixings.get(k, 0.025)
+    def addFixing(self, d, v):
+        self._fixings[str(d)] = v
+ql.Euribor6M = QLEuribor6M
+
+class QLSchedule:
+    def __init__(self, start, end, tenor, calendar, bdc1, bdc2, dg, eomt):
+        self._dates = []
+        d = start
+        while True:
+            self._dates.append(d)
+            nd = d + tenor
+            if hasattr(nd, 'dt') and hasattr(end, 'dt') and nd.dt >= end.dt:
+                break
+            elif not hasattr(nd, 'dt'):
+                break
+            d = nd
+        self._dates.append(end)
+    def __iter__(self): return iter(self._dates)
+    def __len__(self): return len(self._dates)
+    def __getitem__(self, i): return self._dates[i]
+ql.Schedule = QLSchedule
+
+class QLVanillaSwap:
+    Receiver = 1
+    Payer = -1
+    def __init__(self, typ, nominal, fixedSch, fixedRate, fixedDC, floatSch, index, spread, floatDC):
+        self._typ = typ
+        self._nominal = nominal
+        self._fixed_sch = fixedSch
+        self._fixed_rate = fixedRate
+        self._float_sch = floatSch
+        self._engine = None
+    def setPricingEngine(self, engine): self._engine = engine
+    def NPV(self):
+        n = self._nominal
+        r = self._fixed_rate
+        years = 4
+        if self._engine and hasattr(self._engine, 'handle'):
+            h = self._engine.handle
+            while hasattr(h, 'currentLink') and callable(h.currentLink) and h.currentLink() is not None:
+                h = h.currentLink()
+            if hasattr(h, 'discount'):
+                total = 0.0
+                for t in range(1, years+1):
+                    total += n * r * h.discount(float(t))
+                total += n * h.discount(float(years))
+                total -= n * h.discount(0.0)
+                return self._typ * total
+        return self._typ * n * r * years * 0.01
+ql.VanillaSwap = QLVanillaSwap
+
+class QLGsrProcess:
+    def expectation(self, t, x, dt): return x * np.exp(-0.04 * dt)
+    def stdDeviation(self, t, x, dt): return 0.008 * np.sqrt(dt)
+
+class QLGsr:
+    def __init__(self, yts, stepDates, vols, meanRevs):
+        self._yts = yts
+        self._process = QLGsrProcess()
+    def stateProcess(self): return self._process
+    def zerobond(self, T, t, y):
+        r = 0.025 + 0.005 * y if isinstance(y, (int, float)) else 0.025
+        dt = T - t if T > t else 0.01
+        return np.exp(-r * dt)
+ql.Gsr = QLGsr
+
+class QLDiscountCurve:
+    def __init__(self, dates, discounts, dc):
+        self._dates = dates
+        self._discounts = list(discounts)
+    def enableExtrapolation(self): pass
+    def discount(self, t):
+        if isinstance(t, (int, float)):
+            idx = min(int(t), len(self._discounts)-1)
+            idx = max(0, idx)
+            return self._discounts[idx]
+        return 1.0
+ql.DiscountCurve = QLDiscountCurve
+
+class QLDiscountingSwapEngine:
+    def __init__(self, handle): self.handle = handle
+ql.DiscountingSwapEngine = QLDiscountingSwapEngine
+
+class QLHazardRateCurve:
+    def __init__(self, dates, rates, dc):
+        import numpy as _np
+        self._times = []
+        if len(dates) > 0 and hasattr(dates[0], 'dt'):
+            base = dates[0].dt
+            for d in dates:
+                self._times.append((d.dt - base).days / 365.0)
+        else:
+            self._times = [float(i) for i in range(len(dates))]
+        self._rates = list(rates)
+    def enableExtrapolation(self): pass
+    def _interp_rate(self, t):
+        import numpy as _np
+        return float(_np.interp(t, self._times, self._rates))
+    def hazardRate(self, t):
+        return self._interp_rate(float(t))
+    def survivalProbability(self, t):
+        import numpy as _np
+        h = self._interp_rate(float(t))
+        return float(_np.exp(-h * float(t)))
+    def defaultProbability(self, *args):
+        if len(args) == 2:
+            return self.survivalProbability(args[0]) - self.survivalProbability(args[1])
+        return 1.0 - self.survivalProbability(args[0])
+    def defaultDensity(self, t):
+        h = self._interp_rate(float(t))
+        return h * self.survivalProbability(float(t))
+ql.HazardRateCurve = QLHazardRateCurve
+
+class QLIndexManager:
+    _inst = None
+    @classmethod
+    def instance(cls):
+        if cls._inst is None: cls._inst = cls()
+        return cls._inst
+    def clearHistories(self): pass
+ql.IndexManager = QLIndexManager
+
+class QLMersenneTwisterUniformRng:
+    def __init__(self, seed=0):
+        self._rng = __import__('random').Random(seed)
+    def next(self):
+        class Res:
+            def __init__(self, v): self.value = v
+        return Res(self._rng.random())
+ql.MersenneTwisterUniformRng = QLMersenneTwisterUniformRng
+
+class QLMersenneTwisterUniformRsg:
+    def __init__(self, dim, rng):
+        self._dim = dim
+        self._rng = rng
+    def nextSequence(self):
+        class Seq:
+            def __init__(self, vals): self.value = vals
+        return Seq([self._rng.next().value for _ in range(self._dim)])
+    def dimension(self): return self._dim
+ql.MersenneTwisterUniformRsg = QLMersenneTwisterUniformRsg
+
+class QLInvCumulativeGaussianRsg:
+    def __init__(self, rsg):
+        self._rsg = rsg
+    def nextSequence(self):
+        import scipy.stats as _st
+        seq = self._rsg.nextSequence()
+        vals = [float(_st.norm.ppf(max(1e-10, min(1-1e-10, u)))) for u in seq.value]
+        class Seq:
+            def __init__(self, v): self.value = v
+        return Seq(vals)
+ql.InvCumulativeMersenneTwisterGaussianRsg = QLInvCumulativeGaussianRsg
+
 print("✅ QuantLib (ql) 強大模擬層已啟動。")
 `;
 
@@ -289,57 +467,91 @@ export const PANDAS_DATAREADER_SHIM = `
 def simulated_data_reader(name, data_source=None, start=None, end=None, **kwargs):
     import pandas as pd
     import numpy as np
-    print(f"📡 模擬數據引擎：由於瀏覽器 CORS 限制，正在為 {name} 產生模擬股價數據...")
+    
+    # 預設行為：模擬 Yahoo Finance 結構 (High, Low, Open, Close, Volume, Adj Close)
+    print(f"📡 模擬數據引擎：由於瀏覽器 CORS 限制，正在為 {name} 產生模擬股價數據 (Yahoo Finance Bypass)...")
     
     start_date = pd.to_datetime(start or '2020-01-01')
     end_date = pd.to_datetime(end or '2020-12-31')
     dates = pd.date_range(start_date, end_date)
     
     tickers = [name] if isinstance(name, str) else name
-    data = {}
-    for ticker in tickers:
-        stock_map = {
-            'goog': 1500, 'amzn': 2000, 'fb': 200, 'nflx': 300, 
-            'gld': 150, 'ge': 80, 'nke': 100, 'ford': 10, 'dis': 180, 'aapl': 150, 'tsla': 700
-        }
-        base_price = stock_map.get(ticker.lower(), 100)
-        returns = np.random.normal(0.0005, 0.02, len(dates))
-        price = base_price * np.exp(np.cumsum(returns))
-        data[ticker] = price
-    # Logic dispatch based on data source
-    if data_source == 'fred':
-        # FRED returns columns named after the series ID (ticker)
-        return pd.DataFrame(data, index=dates)
     
-    # Default (Yahoo-like): returns Adj Close, High, Low, etc. (Simulated as just Adj Close here)
-    if len(tickers) > 1:
-        df = pd.DataFrame(data, index=dates)
-        df.columns = pd.MultiIndex.from_product([['Adj Close'], tickers])
-        return df
-    else:
-        # Fix: Use tickers[0] to avoid "unhashable type: list" if name was a list
-        target_ticker = tickers[0]
-        df = pd.DataFrame({'Adj Close': data[target_ticker]}, index=dates)
-        return df
+    # 支援多 Ticker 回傳
+    result_dict = {}
+    
+    for ticker in tickers:
+        ticker_lower = ticker.lower()
+        
+        # 定義不同股票的基礎特徵 (Base Price, Volatility)
+        stock_map = {
+            'goog': (1500, 0.015), 'amzn': (3200, 0.018), 'fb': (270, 0.02), 'meta': (270, 0.02),
+            'nflx': (500, 0.025), 'gld': (180, 0.008), 'ge': (10, 0.012), 
+            'nke': (140, 0.012), 'ford': (9, 0.015), 'dis': (170, 0.015), 
+            'aapl': (130, 0.018), 'tsla': (700, 0.035), 'sp500': (3700, 0.01),
+            '^gspc': (3700, 0.01), 'wti': (48, 0.025)
+        }
+        
+        base_price, volatility = stock_map.get(ticker_lower, (100, 0.02))
+        
+        # 產生隨機漫步價格
+        np.random.seed(sum(ord(c) for c in ticker) + len(dates)) # Deterministic random based on ticker
+        returns = np.random.normal(0.0005, volatility, len(dates))
+        price_path = base_price * np.exp(np.cumsum(returns))
+        
+        # 產生 OHLCV
+        df_ticker = pd.DataFrame(index=dates)
+        df_ticker['Adj Close'] = price_path
+        df_ticker['Close'] = price_path
+        df_ticker['Open'] = price_path * np.random.uniform(0.99, 1.01, len(dates))
+        df_ticker['High'] = np.maximum(df_ticker['Open'], df_ticker['Close']) * np.random.uniform(1.0, 1.01, len(dates))
+        df_ticker['Low'] = np.minimum(df_ticker['Open'], df_ticker['Close']) * np.random.uniform(0.99, 1.0, len(dates))
+        df_ticker['Volume'] = np.random.randint(1000000, 10000000, len(dates))
+        
+        result_dict[ticker] = df_ticker
 
+    # FRED 數據源處理 (Return single column per series)
+    if data_source == 'fred':
+        fred_data = {t: result_dict[t]['Adj Close'] for t in tickers}
+        df = pd.DataFrame(fred_data)
+        return df.astype(float) # Strict float casting
+        
+    # Yahoo 數據源處理
+    if len(tickers) == 1:
+        return result_dict[tickers[0]].astype(float)
+    else:
+        # Multi-index dataframe for multiple tickers
+        reformed_data = {}
+        for attr in ['High', 'Low', 'Open', 'Close', 'Volume', 'Adj Close']:
+            reformed_data[attr] = pd.DataFrame({t: result_dict[t][attr] for t in tickers})
+        
+        # Concatenate significantly simplifies structure
+        return pd.concat(reformed_data, axis=1).astype(float)
+
+# 強制攔截 Patching
 try:
     import sys
     import pandas_datareader
     import pandas_datareader.data as pdr_data
-    methods = ['DataReader', 'get_data_yahoo', 'get_data_stooq', 'get_data_fred']
-    for method in methods:
-        setattr(pdr_data, method, simulated_data_reader)
-        setattr(pandas_datareader, method, simulated_data_reader)
-    sys.modules['pandas_datareader.data'].DataReader = simulated_data_reader
-    sys.modules['pandas_datareader'].DataReader = simulated_data_reader
-    for method in methods:
-        setattr(sys.modules['pandas_datareader.data'], method, simulated_data_reader)
-        setattr(sys.modules['pandas_datareader'], method, simulated_data_reader)
-    print("✅ 模擬數據引擎：攔截器已成功啟動。")
+    
+    # 替換核心函數
+    pdr_data.DataReader = simulated_data_reader
+    pdr_data.get_data_yahoo = simulated_data_reader
+    pdr_data.get_data_fred = simulated_data_reader
+    
+    # 替換頂層
+    pandas_datareader.DataReader = simulated_data_reader
+    if hasattr(pandas_datareader, 'data'):
+        pandas_datareader.data.DataReader = simulated_data_reader
+        pandas_datareader.data.get_data_yahoo = simulated_data_reader
+        
+    print("✅ 模擬數據引擎：已成功攔截 pandas_datareader (Yahoo/FRED CORS Bypass)。")
+    
 except ImportError:
+    # 即使尚未匯入，也要嘗試預先注入 sys.modules (為了稍後匯入時能生效? 難以做到，只能依靠 App.jsx 在匯入後觸發此墊片)
     pass
 except Exception as e:
-    print(f"⚠️ 模擬數據引擎啟動失敗: {str(e)}")
+    print(f"⚠️ 模擬數據引擎啟動警告: {str(e)}")
 `;
 
 export const SCIPY_RVS_SHIM = `
@@ -392,10 +604,20 @@ except Exception:
     stats = types.ModuleType('scipy.stats')
 
     def _scalar_or_array(func):
-        def wrapper(x, *args, **kwargs):
-            x_arr = np.array(x)
-            if x_arr.shape == (): return func(float(x), *args, **kwargs)
-            return np.array([func(float(xi), *args, **kwargs) for xi in x_arr])
+        def wrapper(self, x, *args, **kwargs):
+            try:
+                # If x is numpy array or list
+                if hasattr(x, '__iter__') and not isinstance(x, (str, bytes)):
+                    x_arr = np.array(x)
+                else:
+                    x_arr = np.array([x])
+                    
+                if x_arr.size == 1:
+                    return func(self, float(x_arr.item()), *args, **kwargs)
+                return np.array([func(self, float(xi), *args, **kwargs) for xi in x_arr.flat]).reshape(x_arr.shape)
+            except Exception:
+                 # Fallback for weird types
+                 return func(self, x, *args, **kwargs)
         return wrapper
 
     def norm(loc=0.0, scale=1.0):
@@ -504,6 +726,141 @@ try:
     if not hasattr(scipy.stats, 'binom_test') and hasattr(scipy.stats, 'binomtest'):
         scipy.stats.binom_test = lambda k, n=None, p=0.5, alt='two-sided': scipy.stats.binomtest(k, n, p, alt).pvalue
 except ImportError: pass
+except Exception:
+    pass
+
+# Provide a lightweight fallback for scipy.stats.binom when SciPy's binom is missing
+try:
+    import scipy
+    import numpy as _np
+    import math
+    if hasattr(scipy, 'stats'):
+        _ss = scipy.stats
+        if not hasattr(_ss, 'binom'):
+            class _BinomFactory:
+                def __call__(self, n, p):
+                    nn = int(n)
+                    pp = float(p)
+                    class Dist:
+                        def __init__(self, nn, pp):
+                            self.n = nn
+                            self.p = pp
+                        def pmf(self, k):
+                            k_int = int(k)
+                            try:
+                                return math.comb(self.n, k_int) * (self.p ** k_int) * ((1 - self.p) ** (self.n - k_int))
+                            except Exception:
+                                # fallback for older Python without comb
+                                from math import factorial
+                                return factorial(self.n) // (factorial(k_int) * factorial(self.n - k_int)) * (self.p ** k_int) * ((1 - self.p) ** (self.n - k_int))
+                        def rvs(self, size=None):
+                            return _np.random.binomial(self.n, self.p, size=size)
+                    return Dist(nn, pp)
+            _ss.binom = _BinomFactory()
+except Exception:
+    pass
+
+# Expand lightweight fallbacks for common discrete SciPy distributions
+try:
+    import scipy
+    import numpy as _np
+    import math
+    if hasattr(scipy, 'stats'):
+        _ss = scipy.stats
+
+        def _comb(n, k):
+            try:
+                return math.comb(n, k)
+            except Exception:
+                from math import factorial
+                return factorial(n) // (factorial(k) * factorial(n - k))
+
+        # Bernoulli
+        if not hasattr(_ss, 'bernoulli'):
+            class _BernFactory:
+                def __call__(self, p):
+                    pp = float(p)
+                    class Dist:
+                        def pmf(self, k):
+                            ki = int(k)
+                            return pp if ki == 1 else (1.0 - pp)
+                        def rvs(self, size=None):
+                            return _np.random.binomial(1, pp, size=size)
+                    return Dist()
+            _ss.bernoulli = _BernFactory()
+
+        # Poisson
+        if not hasattr(_ss, 'poisson'):
+            class _PoisFactory:
+                def __call__(self, mu):
+                    mm = float(mu)
+                    class Dist:
+                        def pmf(self, k):
+                            ki = int(k)
+                            return math.exp(-mm) * (mm ** ki) / math.factorial(ki)
+                        def rvs(self, size=None):
+                            return _np.random.poisson(mm, size=size)
+                    return Dist()
+            _ss.poisson = _PoisFactory()
+
+        # Geometric (SciPy uses support 1,2,3...)
+        if not hasattr(_ss, 'geom'):
+            class _GeomFactory:
+                def __call__(self, p):
+                    pp = float(p)
+                    class Dist:
+                        def pmf(self, k):
+                            ki = int(k)
+                            if ki < 1: return 0.0
+                            return (1 - pp) ** (ki - 1) * pp
+                        def rvs(self, size=None):
+                            return _np.random.geometric(pp, size=size)
+                    return Dist()
+            _ss.geom = _GeomFactory()
+
+        # RandInt (discrete uniform [low, high))
+        if not hasattr(_ss, 'randint'):
+            class _RandIntFactory:
+                def __call__(self, low, high=None):
+                    lo = int(low)
+                    hi = int(high) if high is not None else lo
+                    # numpy randint semantics: low (inclusive), high (exclusive)
+                    def _pmf(k):
+                        ki = int(k)
+                        if hi <= lo:
+                            return 0.0
+                        return 1.0 / (hi - lo) if (lo <= ki < hi) else 0.0
+                    class Dist:
+                        def pmf(self, k): return _pmf(k)
+                        def rvs(self, size=None): return _np.random.randint(lo, hi, size=size)
+                    return Dist()
+            _ss.randint = _RandIntFactory()
+
+        # Hypergeometric (ngood, nbad, nsample)
+        if not hasattr(_ss, 'hypergeom'):
+            class _HyperFactory:
+                def __call__(self, M, n, N):
+                    M_i = int(M)
+                    n_i = int(n)
+                    N_i = int(N)
+                    class Dist:
+                        def pmf(self, k):
+                            ki = int(k)
+                            if ki < 0 or ki > n_i: return 0.0
+                            # C(M, k) * C(M - k, N - k) / C(M, N) but use safe combinatorics
+                            try:
+                                num = _comb(n_i, ki) * _comb(M_i - n_i, N_i - ki)
+                                den = _comb(M_i, N_i)
+                                return num / den if den != 0 else 0.0
+                            except Exception:
+                                return 0.0
+                        def rvs(self, size=None):
+                            # Use numpy hypergeometric: numpy.hypergeometric(ngood, nbad, nsample)
+                            return _np.random.hypergeometric(n_i, M_i - n_i, N_i, size=size)
+                    return Dist()
+            _ss.hypergeom = _HyperFactory()
+except Exception:
+    pass
 `;
 
 export const DATASET_SHIM = `
@@ -514,10 +871,20 @@ import sys
 def check_and_redirect(path):
     if not isinstance(path, str):
         return path
-    # If path looks like Windows or Unix absolute path
-    if (':' in path and '\\\\' in path) or path.startswith('/'):
+    
+    # Debug: Print intercepted path
+    # print(f"🔍 Checking path: {path}")
+
+    # Robust check for Windows/Unix absolute paths
+    is_absolute = False
+    _bs = chr(92)  # backslash, avoids escaping issues in generated code
+    # Windows drive path example: C:\\path or Unix style: /path
+    if len(path) >= 3 and path[1] == ':' and (path[2] == _bs or path[2] == '/'): is_absolute = True
+    if path.startswith('/'): is_absolute = True # Unix
+    
+    if is_absolute:
         filename = os.path.basename(path)
-        # Search virtual /data directory
+        # Search virtual /data directory recursively
         for root, dirs, files in os.walk('/data'):
             if filename in files:
                 target = os.path.join(root, filename)
@@ -572,51 +939,176 @@ export const ARCH_STUB = `
 # arch (Autoregressive Conditional Heteroskedasticity) stub
 import sys
 from types import ModuleType
+import numpy as np
 
 arch = ModuleType('arch')
 arch_univariate = ModuleType('arch.univariate')
 
 class ConstantMean:
-    def __init__(self, *args, **kwargs): pass
+    def __init__(self, y=None, *args, **kwargs): 
+        self.y = y if y is not None else np.array([])
+        
     def fit(self, *args, **kwargs):
+        y_in = self.y
+        n = len(y_in)
         class FitRes:
-            def __init__(self): self.summary = lambda: "ARCH Stub: Models involving 'arch' are not supported in the browser."
-            def __getattr__(self, name): return lambda *args, **kwargs: None
-        return FitRes()
+            def __init__(self, n, y_in): 
+                self.n = n
+                # Preserve the original index (DatetimeIndex) if y is a pandas Series/DataFrame.
+                idx = None
+                try:
+                    if hasattr(y_in, 'index'):
+                        idx = y_in.index
+                except Exception:
+                    idx = None
+
+                try:
+                    import pandas as pd
+                    if idx is None:
+                        idx = pd.RangeIndex(start=0, stop=n, step=1)
+                    self._conditional_volatility = pd.Series(np.zeros(n), index=idx, name='conditional_volatility')
+                    self._resid = pd.Series(np.zeros(n), index=idx, name='resid')
+                except Exception:
+                    self._conditional_volatility = np.zeros(n)
+                    self._resid = np.zeros(n)
+                # arch.fit() returns an object with many numeric attributes (params/aic/bic/etc).
+                # Provide safe defaults so book examples don't crash when casting/printing.
+                try:
+                    import pandas as pd
+                    self.params = pd.Series([0.0], index=['mu'])
+                except Exception:
+                    self.params = np.array([0.0])
+
+                self.aic = 0.0
+                self.bic = 0.0
+                self.loglikelihood = 0.0
+                self.convergence_flag = 0
+
+                def _summary():
+                    return "ARCH Stub: 'arch' is not supported in the browser; returning dummy fit results."
+                self.summary = _summary
+            
+            @property
+            def conditional_volatility(self):
+                return self._conditional_volatility
+            
+            @property
+            def resid(self):
+                return self._resid
+                
+            def plot(self, *args, **kwargs):
+                print("ARCH Stub: Plot called.")
+                return None
+                
+            def __getattr__(self, name):
+                # Common numeric attributes used in examples
+                if name in ('nobs', 'num_params', 'scale'):
+                    return 0.0
+                if name in ('tvalues', 'pvalues', 'std_err'):
+                    try:
+                        import pandas as pd
+                        return pd.Series([0.0], index=['mu'])
+                    except Exception:
+                        return np.array([0.0])
+                return lambda *args, **kwargs: None
+                
+        return FitRes(n, y_in)
 
 arch_univariate.ConstantMean = ConstantMean
-arch_univariate.arch_model = lambda *args, **kwargs: ConstantMean()
+arch_univariate.arch_model = lambda y, *args, **kwargs: ConstantMean(y)
 arch.arch_model = arch_univariate.arch_model
 
 sys.modules['arch'] = arch
 sys.modules['arch.univariate'] = arch_univariate
-print("✅ arch stub installed (browser fallback).")
+print("✅ arch stub installed (browser fallback) with dummy data support.")
 `;
 
 export const MIBIAN_STUB = `
-# mibian (Options Pricing) stub
+# mibian (Options Pricing) stub with Black-Scholes pricing
 import sys
+import math
 from types import ModuleType
 
 mibian = ModuleType('mibian')
 
+def _norm_cdf(x):
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
+
+def _norm_pdf(x):
+    return math.exp(-0.5 * x * x) / math.sqrt(2.0 * math.pi)
+
 class BS:
-    def __init__(self, *args, **kwargs):
-        self.callPrice = 0.0
-        self.putPrice = 0.0
-        self.callDelta = 0.0
-        self.putDelta = 0.0
-        self.callTheta = 0.0
-        self.putTheta = 0.0
-        self.callGamma = 0.0
-        self.putGamma = 0.0
-        self.vega = 0.0
-        self.impliedVolatility = 0.0
+    """Black-Scholes pricing: BS([S, K, r, T], volatility=sigma) or BS([S, K, r, T], callPrice=c)"""
+    def __init__(self, params=None, volatility=None, callPrice=None, putPrice=None, *args, **kwargs):
+        if params is None:
+            params = args[0] if args else [100, 100, 5, 30]
+        S = float(params[0])
+        K = float(params[1])
+        r = float(params[2]) / 100.0  # mibian uses % for rate
+        T = float(params[3]) / 365.0  # mibian uses days
+
+        if volatility is not None:
+            sigma = float(volatility) / 100.0  # mibian uses %
+            sqrtT = math.sqrt(max(T, 1e-10))
+            d1 = (math.log(S / K) + (r + 0.5 * sigma**2) * T) / (sigma * sqrtT)
+            d2 = d1 - sigma * sqrtT
+            self.callPrice = S * _norm_cdf(d1) - K * math.exp(-r * T) * _norm_cdf(d2)
+            self.putPrice = K * math.exp(-r * T) * _norm_cdf(-d2) - S * _norm_cdf(-d1)
+            self.callDelta = _norm_cdf(d1)
+            self.putDelta = self.callDelta - 1.0
+            self.callGamma = self.putGamma = _norm_pdf(d1) / (S * sigma * sqrtT)
+            self.vega = S * _norm_pdf(d1) * sqrtT / 100.0
+            self.callTheta = (-(S * _norm_pdf(d1) * sigma) / (2 * sqrtT) - r * K * math.exp(-r * T) * _norm_cdf(d2)) / 365.0
+            self.putTheta = (-(S * _norm_pdf(d1) * sigma) / (2 * sqrtT) + r * K * math.exp(-r * T) * _norm_cdf(-d2)) / 365.0
+            self.callRho = K * T * math.exp(-r * T) * _norm_cdf(d2) / 100.0
+            self.putRho = -K * T * math.exp(-r * T) * _norm_cdf(-d2) / 100.0
+            self.impliedVolatility = sigma * 100.0
+        elif callPrice is not None or putPrice is not None:
+            target = float(callPrice) if callPrice is not None else float(putPrice)
+            is_call = callPrice is not None
+            # Newton's method for implied vol
+            sigma = 0.3
+            for _ in range(100):
+                sqrtT = math.sqrt(max(T, 1e-10))
+                d1 = (math.log(S / K) + (r + 0.5 * sigma**2) * T) / (sigma * sqrtT)
+                d2 = d1 - sigma * sqrtT
+                if is_call:
+                    price = S * _norm_cdf(d1) - K * math.exp(-r * T) * _norm_cdf(d2)
+                else:
+                    price = K * math.exp(-r * T) * _norm_cdf(-d2) - S * _norm_cdf(-d1)
+                vega = S * _norm_pdf(d1) * sqrtT
+                if abs(vega) < 1e-12: break
+                sigma = sigma - (price - target) / vega
+                if sigma <= 0: sigma = 0.001
+                if abs(price - target) < 1e-8: break
+            self.impliedVolatility = sigma * 100.0
+            # Fill Greeks at solved vol
+            sqrtT = math.sqrt(max(T, 1e-10))
+            d1 = (math.log(S / K) + (r + 0.5 * sigma**2) * T) / (sigma * sqrtT)
+            d2 = d1 - sigma * sqrtT
+            self.callPrice = S * _norm_cdf(d1) - K * math.exp(-r * T) * _norm_cdf(d2)
+            self.putPrice = K * math.exp(-r * T) * _norm_cdf(-d2) - S * _norm_cdf(-d1)
+            self.callDelta = _norm_cdf(d1)
+            self.putDelta = self.callDelta - 1.0
+            self.callGamma = self.putGamma = _norm_pdf(d1) / (S * sigma * sqrtT)
+            self.vega = S * _norm_pdf(d1) * sqrtT / 100.0
+            self.callTheta = 0.0
+            self.putTheta = 0.0
+            self.callRho = 0.0
+            self.putRho = 0.0
+        else:
+            self.callPrice = self.putPrice = 0.0
+            self.callDelta = self.putDelta = 0.0
+            self.callTheta = self.putTheta = 0.0
+            self.callGamma = self.putGamma = 0.0
+            self.vega = 0.0
+            self.impliedVolatility = 0.0
+            self.callRho = self.putRho = 0.0
 
 mibian.BS = BS
 mibian.Me = BS
 mibian.GK = BS
 
 sys.modules['mibian'] = mibian
-print("✅ mibian stub installed (browser fallback).")
+print("✅ mibian Black-Scholes stub installed (browser fallback).")
 `;

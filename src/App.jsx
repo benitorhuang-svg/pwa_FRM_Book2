@@ -1,9 +1,10 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import TopNav from './components/TopNav'
 import ContentPanel from './components/ContentPanel'
 const CodePreviewPanel = lazy(() => import('./components/CodePreviewPanel'))
 import PythonRunner from './components/PythonRunner'
 import ReloadPrompt from './components/ReloadPrompt'
+import useBodyContent from './hooks/useBodyContent'
 import { Book, Moon, Sun } from 'lucide-react'
 import { loadPyodide, cleanupPyodide, runPythonWithTimeout, loadChapterDatasets, preloadHeavyPackages } from './utils/pyodide-loader'
 import { captureAllPlots, initMatplotlib, ensurePlotsShown } from './utils/matplotlib-handler.js'
@@ -52,7 +53,77 @@ const MODULE_DEPS = {
 }
 import { formatPythonError } from './utils/error-handler'
 import { perfMonitor, reportWebVitals } from './utils/performance'
+import { PANDAS_DATAREADER_SHIM, QUANTLIB_SHIM } from './utils/python-shims'
 import './App.css'
+
+// Version-check + update flow: fetch manifest and trigger SW update/skipWaiting
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  (async () => {
+    try {
+      // Prefer a precise assets manifest if available, otherwise fall back to web manifest
+      const assetsUrl = `${import.meta.env.BASE_URL}assets-manifest.json?t=${Date.now()}`
+      const fallbackUrl = `${import.meta.env.BASE_URL}manifest.webmanifest?t=${Date.now()}`
+      let manifestText = null
+
+      try {
+        const ar = await fetch(assetsUrl, { cache: 'no-store' })
+        if (ar && ar.ok) {
+          manifestText = await ar.text()
+        }
+      } catch {
+        // ignore
+      }
+
+      if (!manifestText) {
+        try {
+          const fr = await fetch(fallbackUrl, { cache: 'no-store' })
+          if (!fr || !fr.ok) return
+          manifestText = await fr.text()
+        } catch {
+            return
+          }
+      }
+
+      const prev = localStorage.getItem('app_assets_manifest_text')
+      if (prev && prev === manifestText) return // no change
+      // store new manifest snapshot
+      localStorage.setItem('app_assets_manifest_text', manifestText)
+
+      // New version detected — attempt smooth SW update
+      const regs = await navigator.serviceWorker.getRegistrations()
+      if (!regs || regs.length === 0) {
+        // no SW registered; reload to get new assets
+        if (!localStorage.getItem('app_manifest_reload_done')) {
+          localStorage.setItem('app_manifest_reload_done', '1')
+          location.reload()
+        }
+        return
+      }
+
+      // Try to update registrations and request skipWaiting on waiting workers
+      for (const reg of regs) {
+        try {
+          await reg.update()
+          if (reg.waiting) {
+            reg.waiting.postMessage({ type: 'SKIP_WAITING' })
+          }
+        } catch (err) {
+          console.warn('SW update attempt failed:', err)
+        }
+      }
+
+      // When the new worker takes control, reload once (guard with flag)
+      const onControllerChange = () => {
+        if (localStorage.getItem('app_manifest_reload_done')) return
+        localStorage.setItem('app_manifest_reload_done', '1')
+        window.location.reload()
+      }
+      navigator.serviceWorker.addEventListener('controllerchange', onControllerChange)
+    } catch (err) {
+      console.warn('Version check/update failed:', err)
+    }
+  })()
+}
 
 function App() {
   const [pyodide, setPyodide] = useState(null)
@@ -68,6 +139,9 @@ function App() {
   const [selectedTopicId, setSelectedTopicId] = useState('')
   const [chapterCache, setChapterCache] = useState({}) // Cache for loaded chapters
 
+  // Lazily fetch modular body sections for the current chapter
+  const { bodyContent } = useBodyContent(currentChapter)
+
   const [output, setOutput] = useState('')
   const [plotImages, setPlotImages] = useState([])
   const [isRunning, setIsRunning] = useState(false)
@@ -80,6 +154,7 @@ function App() {
   const [previewPanelWidth, setPreviewPanelWidth] = useState(600) // Start visible and centered
   const [installedPackages] = useState(new Set())
   const [currentMplBackend, setCurrentMplBackend] = useState(null)
+  const backgroundInitLoggedRef = useRef(false)
 
   // Fetch Chapters Index (Lightweight)
   useEffect(() => {
@@ -210,7 +285,12 @@ function App() {
       // Start loading heavy dependencies in the background
       // This won't block the UI, but will ensure they are ready when needed later
       preloadHeavyPackages(pyodide)
-        .then(() => console.warn('Background initialization complete'))
+        .then(() => {
+          if (!backgroundInitLoggedRef.current) {
+            backgroundInitLoggedRef.current = true
+            console.warn('Background initialization complete')
+          }
+        })
         .catch(err => console.error('Background loaded failed', err))
     }
   }, [pyodide, loading])
@@ -225,8 +305,23 @@ function App() {
     const imports = code.match(/^\s*(?:from|import)\s+([a-zA-Z0-9_]+)/gm)
     if (!imports) return
 
+    // On-demand shims (avoid blocking initial Pyodide startup)
+    if (/^\s*(?:from|import)\s+QuantLib\b/m.test(code) && !installedPackages.has('QuantLib')) {
+      try {
+        if (!isSilent) setOutput(prev => prev + '正在啟用 QuantLib 相容性墊片...\n')
+        await pyodide.runPythonAsync(QUANTLIB_SHIM)
+        installedPackages.add('QuantLib')
+        if (!isSilent) setOutput(prev => prev + '✅ QuantLib 墊片已啟用。\n')
+      } catch (e) {
+        console.warn('QuantLib shim injection failed:', e)
+        if (!isSilent) setOutput(prev => prev + '⚠️ QuantLib 墊片啟用失敗，將嘗試繼續執行...\n')
+      }
+    }
+
     const stdLibs = ['sys', 'os', 'io', 'time', 'timeit', 'base64', 'json', 'datetime', 'math', 're', 'warnings', 'builtins', 'types', 'random', 'csv', 'copy', 'collections', 'itertools', 'functools', 'pathlib', 'fractions', 'struct', 'operator', 'string', 'decimal', 'abc', 'enum', 'typing', 'textwrap']
-    const coreLibs = ['numpy', 'pandas', 'matplotlib', 'scipy', 'statsmodels', 'sympy', 'lxml', 'micropip', 'js', 'builtins', 'QuantLib', 'mcint']
+    // 移除 scipy, statsmodels, sympy, lxml，讓它們變成動態載入
+    // 注意：arch/mibian/mcint/QuantLib 都是以 shim/stub 在核心初始化階段注入，不需要再用 micropip 安裝
+    const coreLibs = ['numpy', 'pandas', 'matplotlib', 'micropip', 'js', 'builtins', 'QuantLib', 'mcint', 'arch', 'mibian']
 
     const neededModules = [...new Set(imports.map(line => {
       const parts = line.trim().split(/\s+/)
@@ -236,35 +331,92 @@ function App() {
 
     if (neededModules.length === 0) return
 
-    const toInstall = []
+    const toLoadPackage = []
+    const toMicropip = []
     const wheelsBase = new URL(import.meta.env.BASE_URL || '/', window.location.origin).href
+
+    // Packages that should be loaded via pyodide.loadPackage (binary/compiled, not via micropip)
+    const PYODIDE_BUILTINS = new Set(['scipy', 'statsmodels', 'scikit-learn', 'sympy'])
+
+    const addTarget = (target) => {
+      if (!target) return
+      // Local wheels / remote URLs must go through micropip
+      if (typeof target === 'string' && (target.endsWith('.whl') || target.startsWith('http'))) {
+        toMicropip.push(target)
+        return
+      }
+      if (PYODIDE_BUILTINS.has(target)) {
+        toLoadPackage.push(target)
+      } else {
+        toMicropip.push(target)
+      }
+    }
+
+    // 定義額外的依賴關係 (Explicit Dependencies)
+    const EXTRA_DEPS = {
+      'sklearn': ['scipy', 'scikit-learn'],
+      'scikit-learn': ['scipy'],
+      'statsmodels': ['scipy'],
+      'sympy': [], // mpmath is usually handled by micropip, but good to be safe if needed
+      'seaborn': ['matplotlib', 'pandas', 'scipy', 'statsmodels'],
+      // pandas_datareader in browser: prefer our shim + requests; lxml frequently fails in Pyodide
+      'pandas_datareader': ['requests']
+    }
 
     neededModules.forEach(mod => {
       const target = MODULE_MAPPING[mod]
+
+      // 1. Add the module itself
       if (target) {
-        toInstall.push(target.endsWith('.whl') ? wheelsBase + target : target)
+        addTarget(target.endsWith('.whl') ? wheelsBase + target : target)
+
+        // 2. Add dependencies from MODULE_DEPS (Wheel dependencies)
         const deps = MODULE_DEPS[mod] || []
         deps.forEach(dep => {
           const depTarget = MODULE_DEPS[dep] || dep
-          toInstall.push(depTarget.endsWith('.whl') ? wheelsBase + depTarget : depTarget)
+          addTarget(depTarget.endsWith('.whl') ? wheelsBase + depTarget : depTarget)
         })
+
       } else {
-        toInstall.push(mod)
+        addTarget(mod)
+      }
+
+      // 3. Add explicit package dependencies (Heavy libs)
+      if (EXTRA_DEPS[mod]) {
+        EXTRA_DEPS[mod].forEach(dep => {
+          // Only add if not already installed (optimization)
+          if (!installedPackages.has(dep) && !coreLibs.includes(dep)) {
+            const depTarget = MODULE_MAPPING[dep] || dep
+            addTarget(depTarget.endsWith('.whl') ? wheelsBase + depTarget : depTarget)
+          }
+        })
       }
     })
 
-    if (toInstall.length > 0) {
+    if (toLoadPackage.length > 0 || toMicropip.length > 0) {
       try {
-        const uniqueInstall = [...new Set(toInstall)]
+        const uniqueLoad = [...new Set(toLoadPackage)]
+        const uniqueMicropip = [...new Set(toMicropip)]
         if (!isSilent) {
           setOutput(prev => prev + `正在動態載入所需套件 [${neededModules.join(', ')}]...\n`)
         }
 
-        await pyodide.loadPackage('micropip')
-        await pyodide.runPythonAsync(`
+        // Load compiled packages via pyodide (fast + reliable)
+        for (const pkg of uniqueLoad) {
+          await pyodide.loadPackage(pkg)
+        }
+
+        if (uniqueMicropip.length > 0) {
+          await pyodide.loadPackage('micropip')
+          await pyodide.runPythonAsync(`
 import micropip
-await micropip.install(${JSON.stringify(uniqueInstall)}, keep_going=True)
+await micropip.install(${JSON.stringify(uniqueMicropip)}, keep_going=True)
         `)
+        }
+
+        if (neededModules.includes('pandas_datareader')) {
+          await pyodide.runPythonAsync(PANDAS_DATAREADER_SHIM)
+        }
 
         if (neededModules.includes('matplotlib')) {
           await initMatplotlib(pyodide)
@@ -308,6 +460,17 @@ await micropip.install(${JSON.stringify(uniqueInstall)}, keep_going=True)
     setPlotImages([])
 
     try {
+      // Normalize common absolute dataset paths to the virtual /data mounted by the loader.
+      // This avoids requiring edits to the stored examples and supports local Windows paths present in examples.
+      try {
+        code = code.replace(/pd\.read_csv\(r?['"][^'"]*SPX_Option\.csv['"]\)/g, "pd.read_csv('/data/datasets/b2_ch1/SPX_Option.csv')")
+      } catch { /* ignore regex errors */ }
+
+      // Ensure chapter datasets are available before executing code that reads local files
+      if (currentChapter && currentChapter.id) {
+        await loadChapterDatasets(pyodide, currentChapter.id)
+      }
+
       // 1. Detect and load missing dependencies
       // Move performance timer after dependency loading to measure ACTUAL code execution
       await ensureDependencies(code)
@@ -439,6 +602,7 @@ sys.stdout = StringIO()
           <TopNav
             chapters={chapters}
             currentChapter={currentChapter}
+            bodyContent={bodyContent}
             onChapterSelect={handleChapterSelect}
             currentScript={currentScript}
             onScriptSelect={handleScriptSelect}
@@ -485,6 +649,7 @@ sys.stdout = StringIO()
           <div className="content-pane">
             <ContentPanel
               chapter={currentChapter}
+              bodyContent={bodyContent}
               onCodeClick={handleCodeClick}
               selectedTopicId={selectedTopicId}
               darkMode={darkMode}

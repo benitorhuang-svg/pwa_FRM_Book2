@@ -9,7 +9,7 @@ import './WelcomeScreen.css'
 const marked = new Marked()
 
 
-const ContentPanel = memo(({ chapter, onCodeClick, selectedTopicId, output, isRunning, plotImages }) => {
+const ContentPanel = memo(({ chapter, bodyContent, onCodeClick, selectedTopicId, output, isRunning, plotImages }) => {
   const containerRef = useRef(null)
 
   // Use useMemo to prevent expensive markdown parsing on every re-render (like when resizing)
@@ -47,16 +47,15 @@ const ContentPanel = memo(({ chapter, onCodeClick, selectedTopicId, output, isRu
           if (intro.implementation.scenarios) rawMarkdown += `## 💻 應用場景清單\n${intro.implementation.scenarios}\n\n`
         }
 
-        // Detailed Content (from content.body)
-        const bodyContent = chapter.content?.body || intro.body
-        if (bodyContent) {
+        // Detailed Content — from modular bodyContent prop (or legacy inline body)
+        const resolvedBody = bodyContent || chapter.content?.body || intro.body
+        if (resolvedBody) {
           rawMarkdown += `\n## 📝 章節重點解說 ( 內容由AI產生，非原書本提供 )\n`
-          if (typeof bodyContent === 'string') {
-            // Attempt to parse stringified JSON (fix for malformed chapter data)
+          if (typeof resolvedBody === 'string') {
             let parsedBody = null
             try {
-              if (bodyContent.trim().startsWith('{')) {
-                parsedBody = JSON.parse(bodyContent)
+              if (resolvedBody.trim().startsWith('{')) {
+                parsedBody = JSON.parse(resolvedBody)
               }
             } catch {
               // Ignore parse error, treat as regular string
@@ -65,12 +64,12 @@ const ContentPanel = memo(({ chapter, onCodeClick, selectedTopicId, output, isRu
             if (parsedBody && typeof parsedBody === 'object') {
               rawMarkdown += Object.values(parsedBody).join('\n\n')
             } else {
-              rawMarkdown += bodyContent
+              rawMarkdown += resolvedBody
             }
-          } else if (Array.isArray(bodyContent)) {
-            rawMarkdown += bodyContent.join('\n\n')
-          } else if (typeof bodyContent === 'object') {
-            rawMarkdown += Object.values(bodyContent).join('\n\n')
+          } else if (Array.isArray(resolvedBody)) {
+            rawMarkdown += resolvedBody.join('\n\n')
+          } else if (typeof resolvedBody === 'object') {
+            rawMarkdown += Object.values(resolvedBody).join('\n\n')
           }
         }
       }
@@ -204,7 +203,7 @@ const ContentPanel = memo(({ chapter, onCodeClick, selectedTopicId, output, isRu
       `
       return html
     }
-  }, [chapter])
+  }, [chapter, bodyContent])
 
   useEffect(() => {
     const handleCodeLinkClick = (e) => {

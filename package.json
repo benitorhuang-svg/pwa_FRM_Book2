@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/copy_welcome_assets.js && vite build",
+    "build": "node scripts/copy_welcome_assets.js && vite build && node scripts/generate-assets-manifest.js",
     "preview": "vite preview",
     "build-chapters": "python scripts/build-chapters.py",
-    "predeploy": "npm run build",
+    "predeploy": "npm run build && node scripts/publish-assets-manifest.js",
     "deploy": "gh-pages -d dist",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

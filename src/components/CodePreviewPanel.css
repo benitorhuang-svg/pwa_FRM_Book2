@@ -78,9 +78,12 @@
   height: 100%;
   overflow: hidden;
   min-width: 300px;
-  max-width: 70vw;
-  border-radius: var(--radius-xl);
-  margin: 0.75rem;
+  /* Allow the preview pane wrapper to control width; fill it */
+  width: 100%;
+  max-width: none;
+  /* So the panel sits flush to the right edge, remove right-side radius */
+  border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+  margin: 0;
   box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
 }

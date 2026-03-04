@@ -5,6 +5,7 @@ import './TopNav.css'
 function TopNav({
     chapters,
     currentChapter,
+    bodyContent,
     onChapterSelect,
     currentScript,
     onScriptSelect,
@@ -31,8 +32,8 @@ function TopNav({
             }
         }
 
-        // Always include main body content (new format)
-        const body = content.body
+        // Use modular bodyContent prop (or fallback to legacy inline body)
+        const body = bodyContent || content.body
         if (body) {
             if (typeof body === 'string') {
                 targetText += '\n' + body
@@ -55,7 +56,7 @@ function TopNav({
             matches.push({ id, title })
         }
         return matches
-    }, [currentChapter])
+    }, [currentChapter, bodyContent])
 
     return (
         <div className="top-nav-container">

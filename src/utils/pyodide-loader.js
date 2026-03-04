@@ -1,5 +1,5 @@
 // pyodide-loader.js (Book2)
-import { BASE_ENV_SETUP, PYMOO_SHIM, QUANTLIB_SHIM, PANDAS_DATAREADER_SHIM, SCIPY_RVS_SHIM, DATASET_SHIM, MCINT_SHIM, SCIPY_STUB, ARCH_STUB, MIBIAN_STUB } from './python-shims';
+import { BASE_ENV_SETUP, PYMOO_SHIM, PANDAS_DATAREADER_SHIM, SCIPY_RVS_SHIM, DATASET_SHIM, MCINT_SHIM, SCIPY_STUB, ARCH_STUB, MIBIAN_STUB } from './python-shims';
 
 let pyodideInstance = null;
 let initializationPromise = null;
@@ -57,7 +57,7 @@ async function ensurePyodideScript() {
 
 // Dataset Registry: Maps chapter IDs (lowercase) to their required files
 const DATASET_REGISTRY = {
-    'b2_ch1': [{ filename: 'SPX_Option.csv', displayPath: 'B2_Ch1/SPX_Option.csv' }],
+    'b2_ch1': [{ filename: 'SPX_Option.csv', displayPath: 'datasets/b2_ch1/SPX_Option.csv' }],
     'b2_ch4': [
         { filename: 'BankTeleCompaign.csv', displayPath: 'B2_Ch4/BankTeleCompaign.csv' },
         { filename: 'HazardRate.csv', displayPath: 'B2_Ch4/HazardRate.csv' },
@@ -68,7 +68,13 @@ const DATASET_REGISTRY = {
         { filename: 'WTI.csv', displayPath: 'B2_Ch4/WTI.csv' },
         { filename: 'outliersimpact.csv', displayPath: 'B2_Ch4/outliersimpact.csv' }
     ],
-    'b2_ch9': [{ filename: 'cs-training.csv', displayPath: 'B2_Ch9/cs-training.csv' }],
+    'b2_ch9': [
+        { filename: 'cs-training.csv', displayPath: 'B2_Ch9/cs-training.csv' },
+        { filename: 'CDS_spreads.csv', displayPath: 'datasets/b2_ch9/CDS_spreads.csv' }
+    ],
+    'b2_ch10': [
+        { filename: 'EE.csv', displayPath: 'datasets/b2_ch10/EE.csv' }
+    ],
     'b2_ch11': [
         { filename: 'Data_portfolio_1.xlsx', displayPath: 'B2_Ch11/Data_portfolio_1.xlsx' },
         { filename: 'Data_portfolio_2.xlsx', displayPath: 'B2_Ch11/Data_portfolio_2.xlsx' }
@@ -165,12 +171,44 @@ export async function loadPyodide(onProgress) {
                 console.warn('IDBFS mount skipped:', e);
             }
 
-            smoother.update(50, '📦 核心：正在下載基礎運算模組 (Numpy, Pandas)...')
+            smoother.update(50, '📦 核心：正在下載基礎運算模組 (Numpy, Pandas, SciPy)...')
             await smoother.yieldToUI();
 
-            const corePackages = ['numpy', 'pandas', 'matplotlib', 'micropip'];
+            const corePackages = ['numpy', 'pandas', 'matplotlib', 'scipy', 'micropip'];
             for (const pkg of corePackages) {
-                await pyodide.loadPackage(pkg);
+                try {
+                    await pyodide.loadPackage(pkg);
+                } catch (e) {
+                    console.warn(`[Pyodide] loadPackage failed for ${pkg}:`, e);
+                }
+            }
+
+            // Install local wheels from public/wheels using micropip to ensure availability
+            try {
+                const micropip = pyodide.pyimport('micropip');
+                const baseURL = import.meta.env.BASE_URL || '/';
+                const localWheels = [
+                    'pandas_datareader-0.10.0-py3-none-any.whl',
+                    'openpyxl-3.1.5-py2.py3-none-any.whl',
+                    'seaborn-0.13.2-py3-none-any.whl',
+                    'numpy_financial-1.0.0-py3-none-any.whl',
+                    'pymoo-0.4.1-py3-none-any.whl',
+                    'pyodide_http-0.2.2-py3-none-any.whl',
+                    'requests-2.32.5-py3-none-any.whl'
+                ];
+
+                smoother.update(66, '📦 本地 wheels：正在安裝 (pandas_datareader, openpyxl, seaborn, ...)');
+                for (const wh of localWheels) {
+                    const url = `${baseURL}wheels/${wh}`;
+                    try {
+                        await micropip.install(url);
+                    } catch (instErr) {
+                        console.warn(`[Pyodide] micropip.install failed for ${wh}:`, instErr);
+                    }
+                    await smoother.yieldToUI();
+                }
+            } catch (wheelErr) {
+                console.warn('[Pyodide] Local wheel installation skipped or failed:', wheelErr);
             }
 
             smoother.update(90, '🐍 核心：正在注入 Python 相容性墊片...')
@@ -194,14 +232,29 @@ builtins.input = custom_input
             await smoother.yieldToUI();
 
             // Load essential shims
-            await Promise.all([
-                pyodide.runPythonAsync(BASE_ENV_SETUP),
-                pyodide.runPythonAsync(DATASET_SHIM),
-                // Lightweight stubs for immediate use
-                pyodide.runPythonAsync(SCIPY_STUB), // We will load full scipy later
-                pyodide.runPythonAsync(ARCH_STUB),
-                pyodide.runPythonAsync(MIBIAN_STUB)
-            ]);
+            const runShim = async (shimCode, label, { timeoutMs = 15000, required = false } = {}) => {
+                try {
+                    await runPythonWithTimeout(pyodide, shimCode, timeoutMs);
+                } catch (e) {
+                    console.warn(`[Pyodide] Shim failed: ${label}`, e);
+                    if (required) throw e;
+                }
+                await smoother.yieldToUI();
+            };
+
+            // Required base shims
+            await runShim(BASE_ENV_SETUP, 'BASE_ENV_SETUP', { timeoutMs: 20000, required: true });
+            smoother.update(92, '核心：正在注入資料集路徑重導向...');
+            await runShim(DATASET_SHIM, 'DATASET_SHIM', { timeoutMs: 15000, required: true });
+
+            // Lightweight stubs for immediate use (non-fatal)
+            smoother.update(94, '核心：正在注入常用模組 stub...');
+            await runShim(SCIPY_STUB, 'SCIPY_STUB', { timeoutMs: 15000 });
+            await runShim(ARCH_STUB, 'ARCH_STUB', { timeoutMs: 15000 });
+            await runShim(MIBIAN_STUB, 'MIBIAN_STUB', { timeoutMs: 15000 });
+            await runShim(MCINT_SHIM, 'MCINT_SHIM', { timeoutMs: 15000 });
+
+            // QuantLib shim is large; inject on-demand when user code imports it (see App.jsx ensureDependencies)
 
             pyodideInstance = pyodide;
             initializationPromise = null;
@@ -250,7 +303,6 @@ export async function preloadHeavyPackages(pyodide) {
             await Promise.all([
                 pyodide.runPythonAsync(SCIPY_RVS_SHIM),
                 pyodide.runPythonAsync(PYMOO_SHIM),
-                pyodide.runPythonAsync(QUANTLIB_SHIM),
                 pyodide.runPythonAsync(PANDAS_DATAREADER_SHIM),
                 pyodide.runPythonAsync(MCINT_SHIM)
             ]);

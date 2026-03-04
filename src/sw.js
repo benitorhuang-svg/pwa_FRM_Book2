@@ -5,6 +5,17 @@ import { clientsClaim } from 'workbox-core'
 self.skipWaiting()
 clientsClaim()
 
+// Listen for explicit skip-waiting messages from the client
+self.addEventListener('message', (event) => {
+    try {
+        if (event && event.data && event.data.type === 'SKIP_WAITING') {
+            self.skipWaiting()
+        }
+    } catch {
+        // noop
+    }
+})
+
 // 1. Workbox 預先快取 (Pre-caching)
 // ---------------------------------
 // 自動快取由 VitePWA 生成的清單中的資源

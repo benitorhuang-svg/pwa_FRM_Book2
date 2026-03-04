@@ -1,0 +1,818 @@
+{
+  "assets\\CodePreviewPanel-9CuloFY_.js": {
+    "hash": "8d6efd1633525238f67abac26ec2c472294edf4574f7641e7d4925137e124102",
+    "size": 2819
+  },
+  "assets\\CodePreviewPanel-V3Zu5mOS.css": {
+    "hash": "fda4610fc4bf73b40de593811b0ce99de1249e2411c15c1bc4752d7924895bfa",
+    "size": 6205
+  },
+  "assets\\index-B5sKPdfz.css": {
+    "hash": "35173fe06aefe8f8225933a6fad3942edd116f05fb41646d0a950e786ed031b2",
+    "size": 23957
+  },
+  "assets\\index-DtcKD4Y9.js": {
+    "hash": "1ab86dfcd819e2bc33adc7e68a82c8398524da33bef75c926aeef500c1f83830",
+    "size": 63113
+  },
+  "assets\\KaTeX_AMS-Regular-BQhdFMY1.woff2": {
+    "hash": "0cdd387c9590a1a9f9794560022dbb59654a7d86f187aa0c81495ad42d3a7308",
+    "size": 28076
+  },
+  "assets\\KaTeX_AMS-Regular-DMm9YOAa.woff": {
+    "hash": "30da91e84c893f875e252689faebdc590b2871145e8adc7f9a9d4dbd8ce0b251",
+    "size": 33516
+  },
+  "assets\\KaTeX_AMS-Regular-DRggAlZN.ttf": {
+    "hash": "68534840bcfdd2bffb6f0e8deb48684dd01e7f04ea2813267577afb906de1d13",
+    "size": 63632
+  },
+  "assets\\KaTeX_Caligraphic-Bold-ATXxdsX0.ttf": {
+    "hash": "07d8e303ce4fc12b4bb54f1004170dd190a1f3db45d400fe68060df3e0897268",
+    "size": 12368
+  },
+  "assets\\KaTeX_Caligraphic-Bold-BEiXGLvX.woff": {
+    "hash": "1ae6bd7475590e97e7f145a89e09ccde322f7a6bc0b91607b1c8b8ee28290fed",
+    "size": 7716
+  },
+  "assets\\KaTeX_Caligraphic-Bold-Dq_IR9rO.woff2": {
+    "hash": "de7701e42cf1f4cf0b766c03fb27977207eee2f4fd5d76fa82188406da43ea4c",
+    "size": 6912
+  },
+  "assets\\KaTeX_Caligraphic-Regular-CTRA-rTL.woff": {
+    "hash": "3398dd02302557a793f2863f88e02d96ce10df2abffa07c8e9fa90775116e65c",
+    "size": 7656
+  },
+  "assets\\KaTeX_Caligraphic-Regular-Di6jR-x-.woff2": {
+    "hash": "5d53e70ad607c2352162dec9e0923fb54ecdafaccbf604cd8dcf7d00facb989b",
+    "size": 6908
+  },
+  "assets\\KaTeX_Caligraphic-Regular-wX97UBjC.ttf": {
+    "hash": "ed0b74372feefcbb9c0666b2e210da37b7e49fa7fbbf3eeb11db5f693dacfbb7",
+    "size": 12344
+  },
+  "assets\\KaTeX_Fraktur-Bold-BdnERNNW.ttf": {
+    "hash": "9163df9c7122432e6495b4229fa9071cf9ae86a758ae5efc4924ec2e1a6dbce1",
+    "size": 19584
+  },
+  "assets\\KaTeX_Fraktur-Bold-BsDP51OF.woff": {
+    "hash": "9be7ceb88004ab8ad124082246fbfcca4091e36385d4ec6ed1df67375dad50fb",
+    "size": 13296
+  },
+  "assets\\KaTeX_Fraktur-Bold-CL6g_b3V.woff2": {
+    "hash": "74444efd593c005e3f4573b44524704c0af0a937fe911cca9e94068d0d140d3f",
+    "size": 11348
+  },
+  "assets\\KaTeX_Fraktur-Regular-CB_wures.ttf": {
+    "hash": "1e6f9579e90e2cac37f8f60a597c436e075c114385652b7cbeb0dec0421291b3",
+    "size": 19572
+  },
+  "assets\\KaTeX_Fraktur-Regular-CTYiF6lA.woff2": {
+    "hash": "51814d270d06ff0255dba0799994fa4d8c84d11f09951d47595f4abb1f3602dc",
+    "size": 11316
+  },
+  "assets\\KaTeX_Fraktur-Regular-Dxdc4cR9.woff": {
+    "hash": "5e28753be717dac97f559f49bc10be9cf3c124ddcabda6659d11cb68febc6463",
+    "size": 13208
+  },
+  "assets\\KaTeX_Main-Bold-Cx986IdX.woff2": {
+    "hash": "0f60d1b897938ec918c8ce073092411baf9438f6739465693ff18b0f9d20b021",
+    "size": 25324
+  },
+  "assets\\KaTeX_Main-Bold-Jm3AIy58.woff": {
+    "hash": "c76c5d696297d51b9cb1639c7da4334f0e7dec81b42b11213b5e25ef671bb822",
+    "size": 29912
+  },
+  "assets\\KaTeX_Main-Bold-waoOVXN0.ttf": {
+    "hash": "138ac28d1663b3037e9c5f52371fa5c63d8324f4a38d22cd573e6ea3a3fd0cf8",
+    "size": 51336
+  },
+  "assets\\KaTeX_Main-BoldItalic-DxDJ3AOS.woff2": {
+    "hash": "99cd42a3c072d918f2f44984a807cf7aa16e13545fd0875fc07c6c65f99e715b",
+    "size": 16780
+  },
+  "assets\\KaTeX_Main-BoldItalic-DzxPMmG6.ttf": {
+    "hash": "70ee1f64a20f2048c21940ef46d0144fd215baa953ca69afd1e31e98544f708f",
+    "size": 32968
+  },
+  "assets\\KaTeX_Main-BoldItalic-SpSLRI95.woff": {
+    "hash": "a6f7ec0d846ac7ad975adb8959c37ed49b94acbc4ae436db9ce9e20287e4a64c",
+    "size": 19412
+  },
+  "assets\\KaTeX_Main-Italic-3WenGoN9.ttf": {
+    "hash": "0d85ae7cc30f23790a7f1a58c4a112fdca8aae769b6ba11429af1d98b1b6cb3a",
+    "size": 33580
+  },
+  "assets\\KaTeX_Main-Italic-BMLOBm91.woff": {
+    "hash": "f1d6ef86f3b11a528bd5185199bd2443ecb2b0dead96d88674b5a2c12be24bdf",
+    "size": 19676
+  },
+  "assets\\KaTeX_Main-Italic-NWA7e6Wa.woff2": {
+    "hash": "97479ca6cce906abc961ecac96faa5f9ca2e61b8e7670d475826bcdee9a7c267",
+    "size": 16988
+  },
+  "assets\\KaTeX_Main-Regular-B22Nviop.woff2": {
+    "hash": "c2342cd8b869e01752a9321dc17213fc40d4d04c79688c1d43f2cf316abd7866",
+    "size": 26272
+  },
+  "assets\\KaTeX_Main-Regular-Dr94JaBh.woff": {
+    "hash": "c6368d87e8a1a3a5d337623d83d8dc4b868f242a9ad476237d6f8d1e0f168cdc",
+    "size": 30772
+  },
+  "assets\\KaTeX_Main-Regular-ypZvNtVU.ttf": {
+    "hash": "d0332f52868370fd83ae7fa46470f90c8f2eab2fcf12bc4f88080b340c95a830",
+    "size": 53580
+  },
+  "assets\\KaTeX_Math-BoldItalic-B3XSjfu4.ttf": {
+    "hash": "f9377ab0271cda59af24bcffbd46a4d0c8a3572ffafdbb38de2ad5ea7b0d5ee5",
+    "size": 31196
+  },
+  "assets\\KaTeX_Math-BoldItalic-CZnvNsCZ.woff2": {
+    "hash": "dc47344dbb6cb5b655c8460d561f4df5f501b90c804ad3c6cec65fe322351ab1",
+    "size": 16400
+  },
+  "assets\\KaTeX_Math-BoldItalic-iY-2wyZ7.woff": {
+    "hash": "850c0af5c2238497febaf5e461d880bf458c341f42f4f330f1b1ab5698b1998e",
+    "size": 18668
+  },
+  "assets\\KaTeX_Math-Italic-DA0__PXp.woff": {
+    "hash": "8a8d244581371912b8f3f5a23e2437cb2a59cd9bcaebb0346e722c05737a2571",
+    "size": 18748
+  },
+  "assets\\KaTeX_Math-Italic-flOr_0UB.ttf": {
+    "hash": "08ce98e51b04d58945a301e639e02b6998af29fdfd61a7b8afdd07bbfc479d4a",
+    "size": 31308
+  },
+  "assets\\KaTeX_Math-Italic-t53AETM-.woff2": {
+    "hash": "7af58c5ec8f132a2ddde9027c6d7814decce4d3b822a11192a42a20e2e973264",
+    "size": 16440
+  },
+  "assets\\KaTeX_SansSerif-Bold-CFMepnvq.ttf": {
+    "hash": "1ece03f79f95277d57dc7f6b435a74e1379b0d46104a8530286b60ff49369ea0",
+    "size": 24504
+  },
+  "assets\\KaTeX_SansSerif-Bold-D1sUS0GD.woff2": {
+    "hash": "e99ae51144bf1232efcc1bfe5add36262c6866b0faab24fa75740e1b98577a62",
+    "size": 12216
+  },
+  "assets\\KaTeX_SansSerif-Bold-DbIhKOiC.woff": {
+    "hash": "ece03cfd83e22c212cdef66feb8442d25a083beb988db3f1883f3f9738d750ba",
+    "size": 14408
+  },
+  "assets\\KaTeX_SansSerif-Italic-C3H0VqGB.woff2": {
+    "hash": "00b26ac825e2095056396e0553b8ac26d3f8ad158c3826e28b4c45b385c4714a",
+    "size": 12028
+  },
+  "assets\\KaTeX_SansSerif-Italic-DN2j7dab.woff": {
+    "hash": "91ee67500cc0129aa0ace3ac5c61ff1692102f0f31d02b69347fba35dcb75bf2",
+    "size": 14112
+  },
+  "assets\\KaTeX_SansSerif-Italic-YYjJ1zSn.ttf": {
+    "hash": "3931dd81faed86ba021bb2bbdc36f5bed9a38d6b4f4077aca59b265aa1b02083",
+    "size": 22364
+  },
+  "assets\\KaTeX_SansSerif-Regular-BNo7hRIc.ttf": {
+    "hash": "f36ea897e19f4a2e571d1e900e4e3710e438deb05a842486045ba0a3e616a4ad",
+    "size": 19436
+  },
+  "assets\\KaTeX_SansSerif-Regular-CS6fqUqJ.woff": {
+    "hash": "11e4dc8a6471ff6d6ee561d53d10fde8f7489e798257ff449c5d37c197435605",
+    "size": 12316
+  },
+  "assets\\KaTeX_SansSerif-Regular-DDBCnlJ7.woff2": {
+    "hash": "68e8c73ef42afd3ccec58bf0fba302cce448938e7fc020a5e31f8a952eee1342",
+    "size": 10344
+  },
+  "assets\\KaTeX_Script-Regular-C5JkGWo-.ttf": {
+    "hash": "1c67f068fea8bb09bf099c088b1cf64bd27516a6e07f4684344873564bb66a67",
+    "size": 16648
+  },
+  "assets\\KaTeX_Script-Regular-D3wIWfF6.woff2": {
+    "hash": "036d4e95149b69ff9bcc0cd55771efeb25ffa3947293e69acd78d5ac328c684b",
+    "size": 9644
+  },
+  "assets\\KaTeX_Script-Regular-D5yQViql.woff": {
+    "hash": "d96cdf2b3bdd4d64a8fd5f74a4c467f123a8a73931cd435889f08ffaf9bf947a",
+    "size": 10588
+  },
+  "assets\\KaTeX_Size1-Regular-C195tn64.woff": {
+    "hash": "c943cc986384f59e86bea5fd7dc50a9c4dfe567a7c05eb40d6790720dead97c9",
+    "size": 6496
+  },
+  "assets\\KaTeX_Size1-Regular-Dbsnue_I.ttf": {
+    "hash": "95b6d2f1a50173bfedb8c63e1d1c99b10427d0a4df4201cb44513b226951a22b",
+    "size": 12228
+  },
+  "assets\\KaTeX_Size1-Regular-mCD8mA8B.woff2": {
+    "hash": "6b47c40166b6dbe21a5dfca7718413f2147fd2399be1ba605d8ad39cedf25dfe",
+    "size": 5468
+  },
+  "assets\\KaTeX_Size2-Regular-B7gKUWhC.ttf": {
+    "hash": "a6b2099fb555c60e3a0db3a08842ebf1d732c6eb4e4bf44913613bed4fc4e39b",
+    "size": 11508
+  },
+  "assets\\KaTeX_Size2-Regular-Dy4dx90m.woff2": {
+    "hash": "d04c54219f9eaec6d4d4fd42dfb28785975a4794d6b2fc71e566b9cd6db842dd",
+    "size": 5208
+  },
+  "assets\\KaTeX_Size2-Regular-oD1tc_U0.woff": {
+    "hash": "2014c523c3210bcc166648c4d4cc57f05b747df07a24277bf71c51e67dc79e3d",
+    "size": 6188
+  },
+  "assets\\KaTeX_Size3-Regular-CTq5MqoE.woff": {
+    "hash": "6ab6b62e9b62dae2c00dd90f791bd10950be0ecc3490d7d6045f51c2e8fe0949",
+    "size": 4420
+  },
+  "assets\\KaTeX_Size3-Regular-DgpXs0kz.ttf": {
+    "hash": "500e04d54f0d51666332c9d2089aa803be22aa878eca539e59fa53c6e522b082",
+    "size": 7588
+  },
+  "assets\\KaTeX_Size4-Regular-BF-4gkZK.woff": {
+    "hash": "99f9c6750b489c9462bf04900bd3f939df9b829339daaaaa99ef5495cdddea58",
+    "size": 5980
+  },
+  "assets\\KaTeX_Size4-Regular-Dl5lxZxV.woff2": {
+    "hash": "a4af7d414440a1c1790825cfb700cf9cf43b0f2c4b04f0ebc523011ad9853ec0",
+    "size": 4928
+  },
+  "assets\\KaTeX_Size4-Regular-DWFBv043.ttf": {
+    "hash": "c647367d1dd4e162468717d020e1fc0f1dc5c26ebfdffbe55261713bf88c5877",
+    "size": 10364
+  },
+  "assets\\KaTeX_Typewriter-Regular-C0xS9mPB.woff": {
+    "hash": "e14fed02b1aba7ce9f5afd5844b5d0321b22351febc720e0de8b8723527609f7",
+    "size": 16028
+  },
+  "assets\\KaTeX_Typewriter-Regular-CO6r4hn1.woff2": {
+    "hash": "71d517d67827787cfabdf186914cc3358eda539e37931941f2b2fd4a21f68c0b",
+    "size": 13568
+  },
+  "assets\\KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf": {
+    "hash": "f01f3e87d9c6a61c0c081ceb577abd864eb00a612f7ac1620dd6915fad2ef5aa",
+    "size": 27556
+  },
+  "assets\\vendor-B3CQIlJd.js": {
+    "hash": "88cc02de950f2d1bd00ffe93b8a12259ee5a55913402baf2cedced6340fe7adc",
+    "size": 627792
+  },
+  "assets\\vendor-katex-BZbyxtyH.js": {
+    "hash": "85880b5c3115da81729177ef565106e4a16d296282836c5d5580152287521621",
+    "size": 267748
+  },
+  "assets\\vendor-katex-D3_-qCfu.css": {
+    "hash": "60375ba2a6a228898a4e37523160ac8ec54ee6150f85382832f5e2fc4ed9ce51",
+    "size": 30432
+  },
+  "assets\\vendor-react-BScQi9YO.js": {
+    "hash": "54ea61be9a7d981b0d0f523cb15a0e8192ad51582a535ce65cdae86729c31677",
+    "size": 173406
+  },
+  "assets\\vendor-utils-DahDrsZr.js": {
+    "hash": "f4169fcffb55d3ac65e0f8b2521edba70438fe598fa6e56d212443b97a85ec95",
+    "size": 63681
+  },
+  "coi-serviceworker.js": {
+    "hash": "4b063de635e0205df75d3c60c76bcf19f21035a83172fda88c366918020b40d6",
+    "size": 6183
+  },
+  "data\\chapters_b2_ch1.json": {
+    "hash": "aa35910a6b7762de0186d6c4df504d1ca89b8666ee39ae9bd7ff034e0993cdf2",
+    "size": 38144
+  },
+  "data\\chapters_b2_ch10.json": {
+    "hash": "42de136f5457b29efd405db5172895ba380e0e16d40c5a935950dcc21f1ac7ce",
+    "size": 40348
+  },
+  "data\\chapters_b2_ch11.json": {
+    "hash": "6f27a639b73dc981e96299f6b36a86dc77adc172955e3245f21c38e28e043b1d",
+    "size": 44296
+  },
+  "data\\chapters_b2_ch12.json": {
+    "hash": "a000c2b527b003381ee17b5d703310e703f89099ec5b85ca80e60f4055d78cad",
+    "size": 39109
+  },
+  "data\\chapters_b2_ch2.json": {
+    "hash": "e936b33e21f20075db4394256825c1f0cd684be832b029d11dd5fa38e445df49",
+    "size": 30808
+  },
+  "data\\chapters_b2_ch3.json": {
+    "hash": "a43473c18197cfe2505c74abad9f52a00659948e885e1bd65ebbcf4b71cc5ec5",
+    "size": 27969
+  },
+  "data\\chapters_b2_ch4.json": {
+    "hash": "7ee5d27a13dd8614ba0e24b68ca576b8ef9ceea2214f2ddc12639bb3960aa004",
+    "size": 42569
+  },
+  "data\\chapters_b2_ch5.json": {
+    "hash": "9565060c80a71e36bb60c8b1df7f9ed3aaa552c5050e2f99ab7acf07a86277e4",
+    "size": 57787
+  },
+  "data\\chapters_b2_ch6.json": {
+    "hash": "b59db0a5ff2bce61b5b5c5dcf4107c3e761dceb23b5abc73459627651900f7c6",
+    "size": 38336
+  },
+  "data\\chapters_b2_ch7.json": {
+    "hash": "181d94c8d98df0f57db5cde8c1e5558b77ba6738ee2185d085209d64accf1296",
+    "size": 40286
+  },
+  "data\\chapters_b2_ch8.json": {
+    "hash": "bbc125bcd553180a67e30a99ea9c72aabfdc03f1195e4da4ccc7c0d55498bb08",
+    "size": 28381
+  },
+  "data\\chapters_b2_ch9.json": {
+    "hash": "57dcfba35a8eb099bb75420b669a36c271bb14d73f2285f3c418cee3216220c1",
+    "size": 39478
+  },
+  "data\\chapters_index.json": {
+    "hash": "8a113e81fe1641060c9a389503582e7e37a5a879c0d364d7ec2644ac2fb71d82",
+    "size": 1572
+  },
+  "data\\datasets\\b2_ch1\\SPX_Option.csv": {
+    "hash": "99cb999970ac859ce27bd8c7fe65e3fcc53593995c5d3c2488015f6e3b15f201",
+    "size": 7217
+  },
+  "data\\datasets\\b2_ch11\\Data_portfolio_1.xlsx": {
+    "hash": "218396053cb8c84b2bc3ba32d56980622359a5dfb51689ca904c80fa04db1a3b",
+    "size": 45725
+  },
+  "data\\datasets\\b2_ch12\\Data_portfolio_1.xlsx": {
+    "hash": "8ebda0b14a3987c9fe883c0880ca68f4e196b12a403e22c9ee77baa4a7644e32",
+    "size": 45734
+  },
+  "data\\datasets\\b2_ch12\\Data_portfolio_2.xlsx": {
+    "hash": "fc8d588e2231cef640ff155ec40e1387c012ebffecca1284f4c3ba1afcef44cb",
+    "size": 49132
+  },
+  "data\\datasets\\b2_ch4\\BankTeleCompaign.csv": {
+    "hash": "262abd4ddf2c3593fb761ad9c6a925a8c289e4df514297063f087523c363b40c",
+    "size": 1779353
+  },
+  "data\\datasets\\b2_ch4\\HazardRate.csv": {
+    "hash": "e345e8e59678b57526cc230efc27f513baa5402213e8ab1464d59577ce523191",
+    "size": 64196
+  },
+  "data\\datasets\\b2_ch4\\LassoRegrData.csv": {
+    "hash": "25483c5c57519c09d2bf5646d66aa9b1a86eef411477b3dbd589cd7acca88171",
+    "size": 2363
+  },
+  "data\\datasets\\b2_ch4\\MultiLrRegrData.csv": {
+    "hash": "b6bfb6addbb659c61dff6f34e6cfd054b25f9e69875a9f9fcecd2b4c60f0bfc3",
+    "size": 572
+  },
+  "data\\datasets\\b2_ch4\\outliersimpact.csv": {
+    "hash": "4101c8e9fe2987d006c390d4182ccf4ae3f74ebdac279e46375d022ce68c917f",
+    "size": 542
+  },
+  "data\\datasets\\b2_ch4\\PolyRegrData.csv": {
+    "hash": "63c953bd2f67ddfe15c15d8d217eed938f3bfddbbe3b24e83b68fc4deb17d345",
+    "size": 1867
+  },
+  "data\\datasets\\b2_ch4\\RidgeRegrData.csv": {
+    "hash": "25483c5c57519c09d2bf5646d66aa9b1a86eef411477b3dbd589cd7acca88171",
+    "size": 2363
+  },
+  "data\\datasets\\b2_ch4\\WTI.csv": {
+    "hash": "c88e4969c221c3ba10b506ee96ac20df7de1163b43a454ea2ba19f4b5493f3b0",
+    "size": 46490
+  },
+  "data\\datasets\\b2_ch9\\cs-training.csv": {
+    "hash": "1bd46da486a5708c58c7b01a034fae2a13b327f6f7b62ea7ba4fe3b5824b24ac",
+    "size": 7564965
+  },
+  "data\\modular\\b2_ch1\\1.1.json": {
+    "hash": "111abfab637276e809723432782bfc0530f345bb478d81b5e089ef0f30e374bf",
+    "size": 2353
+  },
+  "data\\modular\\b2_ch1\\1.2.json": {
+    "hash": "68fc8be6304a6a95a772091a868dc87b5c7a4ed5ad3030157bc3c372bb85ec99",
+    "size": 2213
+  },
+  "data\\modular\\b2_ch1\\1.3.json": {
+    "hash": "e0a55b8549d406cfa7e5436e90f33437376d88249dab5b1ce7f9c1bae906b709",
+    "size": 2023
+  },
+  "data\\modular\\b2_ch1\\1.4.json": {
+    "hash": "d984f471c384cd4c219de0d2a3918a2fb06187497143714fe982c8d1c64de13a",
+    "size": 2212
+  },
+  "data\\modular\\b2_ch1\\1.5.json": {
+    "hash": "d425a5c1a988454e862b6d72bca459939a2b76e1a28356e52d7ea104544e94f3",
+    "size": 2248
+  },
+  "data\\modular\\b2_ch1\\1.6.json": {
+    "hash": "96086700bdee1a4fd3a9700a1fe06a4c2a3a9b64185b8364bae8c8230b08ea6a",
+    "size": 1905
+  },
+  "data\\modular\\b2_ch1\\1.7.json": {
+    "hash": "a4ed1ceb2cd507e25cc38e8c268ed639b4890720b63b513279f10f39124d20a8",
+    "size": 2305
+  },
+  "data\\modular\\b2_ch10\\10.1.json": {
+    "hash": "8217f2747005bd38933fccf1937482b69e1d119f0c90fc44bac3edb075f85c77",
+    "size": 2366
+  },
+  "data\\modular\\b2_ch10\\10.2.json": {
+    "hash": "e67317bf2f6141830331e0707137eb6ffdba3239c75262cbed58fc3a8e79bd00",
+    "size": 2337
+  },
+  "data\\modular\\b2_ch10\\10.3.json": {
+    "hash": "21c6dd304164e7810738834aa3f021fdf6062d2cda3e31383ac1651acb37e24f",
+    "size": 2111
+  },
+  "data\\modular\\b2_ch10\\10.4.json": {
+    "hash": "e13e3117edaf269648193910fb4c5d5b00d5e48a6df29656247190a56d7a7add",
+    "size": 2290
+  },
+  "data\\modular\\b2_ch10\\10.5.json": {
+    "hash": "5f85537158085452471db88ae8865be7361064a5b57d6fbdbc4f3ee71c09160b",
+    "size": 2257
+  },
+  "data\\modular\\b2_ch10\\10.6.json": {
+    "hash": "3330c01edb29839bb02dec5cfbe7a456f28fbed8a8619bef24edd04f0f4c643b",
+    "size": 2234
+  },
+  "data\\modular\\b2_ch10\\10.7.json": {
+    "hash": "82cadf0bf2d549ccfbd1ff94d22e3714ae6858a7c2caf01eb6e85efd9b34c87a",
+    "size": 2169
+  },
+  "data\\modular\\b2_ch10\\10.8.json": {
+    "hash": "2478d1005edba8be1cfda325aab2c870f63500dfa973680f0b40d3e3ab826a57",
+    "size": 2741
+  },
+  "data\\modular\\b2_ch10\\10.9.json": {
+    "hash": "74dc268221158eb08f2b91fc4e2de2d1f7b6139305f6b106971dc421ff9406f3",
+    "size": 2284
+  },
+  "data\\modular\\b2_ch11\\11.1.json": {
+    "hash": "c5ac700ee2f98b57ceb863ff182ce354cff3de1fbc4f3c354ed73a3eaab95880",
+    "size": 2263
+  },
+  "data\\modular\\b2_ch11\\11.2.json": {
+    "hash": "47a84b00b9214634a45f5a118d101a0eb1deb4dbae1db2d9cde3fb8aa73725f1",
+    "size": 2254
+  },
+  "data\\modular\\b2_ch11\\11.3.json": {
+    "hash": "1d8cba90db1142dc12b6ae06a502a1c2f0b2595283d3da0891c163bb3bd6f3f3",
+    "size": 2220
+  },
+  "data\\modular\\b2_ch11\\11.4.json": {
+    "hash": "e0090be55570ac5a843561d5455851a3b92efc1aaad4facb966791c011fa87dd",
+    "size": 2227
+  },
+  "data\\modular\\b2_ch11\\11.5.json": {
+    "hash": "34b43dc1fefe26f422371e054456ad491efec5129eb994aad6b2f135953bfc0a",
+    "size": 2322
+  },
+  "data\\modular\\b2_ch11\\11.6.json": {
+    "hash": "5334088592ccee7ae2ddc016a6f766bbeee4d25766d55485abe9627060b57ecb",
+    "size": 2603
+  },
+  "data\\modular\\b2_ch12\\12.1.json": {
+    "hash": "7072ed2a00eba4bd8c895d1f413a22bd7a1b8d2986ccbbe4f1979aa74f83aa18",
+    "size": 2255
+  },
+  "data\\modular\\b2_ch12\\12.2.json": {
+    "hash": "f6d75dc6329c3b244c934f9f4098c7d628fce4e08087c7e8c8bf8606c79e5db3",
+    "size": 2443
+  },
+  "data\\modular\\b2_ch12\\12.3.json": {
+    "hash": "3420a3493b56f93531e2dfb2891878a611696fe2f3ed9b6eb5f27f5339973ca8",
+    "size": 2236
+  },
+  "data\\modular\\b2_ch12\\12.4.json": {
+    "hash": "922a01126184890e4390de1995db6d99f8b3d58c2ecb8cbaf9faa43515d0fbe5",
+    "size": 2326
+  },
+  "data\\modular\\b2_ch12\\12.5.json": {
+    "hash": "ce3996f1f49e33d9b597a4a5a8f8311c16042cd7ba0bbd16ee9576875d986b59",
+    "size": 2703
+  },
+  "data\\modular\\b2_ch2\\2.1.json": {
+    "hash": "4b6b8b1e2f33772edc4e66f99faa6314b6f48013a507b6e140e623611b07d631",
+    "size": 2177
+  },
+  "data\\modular\\b2_ch2\\2.2.json": {
+    "hash": "41685aa821e136f3e6d112ed305c5a44d1ad63b589c8489682045cc07da80ebb",
+    "size": 2178
+  },
+  "data\\modular\\b2_ch2\\2.3.json": {
+    "hash": "6fd5088d0a1cb1519534ac5c45dfe267e76bbc383ab14926ae25a88aa285ff81",
+    "size": 1984
+  },
+  "data\\modular\\b2_ch2\\2.4.json": {
+    "hash": "b3d35f974d9f05d18cde32742d2e6ec7d6e2e5370734b5a0e5f55436882dafb9",
+    "size": 2169
+  },
+  "data\\modular\\b2_ch2\\2.5.json": {
+    "hash": "244bfbea5aad09377d31f51fe46ef48b21a5a1a75c7745b148a0085b40e936c5",
+    "size": 2226
+  },
+  "data\\modular\\b2_ch2\\2.6.json": {
+    "hash": "84d0ad492325c35bf0884a3044a15b90235cad6b7f19bbba2516839fd56045ea",
+    "size": 2154
+  },
+  "data\\modular\\b2_ch2\\2.7.json": {
+    "hash": "34c6b0929baa78bdfaf59cb1ec7ed828dc541d0502dc2a1facc02809657e46ee",
+    "size": 2404
+  },
+  "data\\modular\\b2_ch3\\3.1.json": {
+    "hash": "15b0fa32cdb426237a38e6f8151a1f0165c856dc72d79374c8bb279724033288",
+    "size": 2202
+  },
+  "data\\modular\\b2_ch3\\3.2.json": {
+    "hash": "d9baa07030d9b568318a200d8301c0f1f0ac6628d3a54226f1ede2ce31c8af1f",
+    "size": 2194
+  },
+  "data\\modular\\b2_ch3\\3.3.json": {
+    "hash": "1b10c705df5a9ce1c220f95544d5a31a37b2a4c995c5254c54babb8b9d9042a6",
+    "size": 2187
+  },
+  "data\\modular\\b2_ch3\\3.4.json": {
+    "hash": "884fdbb589b07f7f9e3cba4e83758a994b84dd1d7be4d8b2077cd4d6382e9320",
+    "size": 2121
+  },
+  "data\\modular\\b2_ch3\\3.5.json": {
+    "hash": "8fe4fdabc685fb03e1c2d8d47a9d73ed216afb23ab018ce14a8ddcc9f1c18423",
+    "size": 2314
+  },
+  "data\\modular\\b2_ch3\\3.6.json": {
+    "hash": "3fe2fdf37fa58966d6364c7019eb66f8bbbc2d8525afc207f67d6c6616f30674",
+    "size": 2121
+  },
+  "data\\modular\\b2_ch3\\3.7.json": {
+    "hash": "a355b0a7a6e97417259fabcf9e133456f0e6fbcc64bb1545de3afec97625af06",
+    "size": 2270
+  },
+  "data\\modular\\b2_ch3\\3.8.json": {
+    "hash": "2d4ae00f2b0467210b4309d9f9bd4eb5f0cb1babd91617a1339ece396830499a",
+    "size": 2425
+  },
+  "data\\modular\\b2_ch4\\4.1.json": {
+    "hash": "9179598cfa8b59732d389fb3bd29db409ffc9fff402d68019fc4664d2f5f8f82",
+    "size": 2224
+  },
+  "data\\modular\\b2_ch4\\4.2.json": {
+    "hash": "d5515d0ae9f9bf7d5df642a9cfa17b5fc1b23bc9b6ffb906976e67b92b498f1b",
+    "size": 2166
+  },
+  "data\\modular\\b2_ch4\\4.3.json": {
+    "hash": "07b3764237389a8ac56d604628e394b1e982e9dd16a20d3c543a10e9c8f97dc5",
+    "size": 2330
+  },
+  "data\\modular\\b2_ch4\\4.4.json": {
+    "hash": "6c9a42706bcca52db5083b68b7660feebec79b476dcf3155ebdced4f41a50e05",
+    "size": 2281
+  },
+  "data\\modular\\b2_ch4\\4.5.json": {
+    "hash": "0f274fc5a196136fa314f9d8b04869fb09bdea078b616b6ad614912e76ad00e6",
+    "size": 1929
+  },
+  "data\\modular\\b2_ch4\\4.6.json": {
+    "hash": "dddaa604b76f1f6dbbdd017ff26b16a2be288fcb9fcfa094844ab10020444bec",
+    "size": 1976
+  },
+  "data\\modular\\b2_ch4\\4.7.json": {
+    "hash": "7d6192b4561ba7c499e515c7311538e5c33b4f6e6b5e4c50ecd2885a90740c42",
+    "size": 2454
+  },
+  "data\\modular\\b2_ch5\\5.1.json": {
+    "hash": "df3a3f046c97f88c2de3336fda8f6976cca06e95143f7426b915a7903f04dab1",
+    "size": 2124
+  },
+  "data\\modular\\b2_ch5\\5.2.json": {
+    "hash": "e9dc69f88823af8dcf4081440689c8ea91171464e50a8aebcb1cd809e9caf477",
+    "size": 2030
+  },
+  "data\\modular\\b2_ch5\\5.3.json": {
+    "hash": "454f9e4bff9f5c31779b8c572b4def951d49f8e1e79abbe40cd53e6cf031de3d",
+    "size": 1922
+  },
+  "data\\modular\\b2_ch5\\5.4.json": {
+    "hash": "50c4d0fe7afba769f48211d8e04908e1420c89b1c53126123f8b38848f14b888",
+    "size": 2142
+  },
+  "data\\modular\\b2_ch5\\5.5.json": {
+    "hash": "ea57a2cf70d9b897a1e9263b572be1a0ceb950ace371c187c3f35b8af2d05fc5",
+    "size": 2363
+  },
+  "data\\modular\\b2_ch5\\5.6.json": {
+    "hash": "82903446b56cb5060ff1c6fa81d6f57f893fe68fd76f430d7f8974bad49e8454",
+    "size": 2180
+  },
+  "data\\modular\\b2_ch6\\6.1.json": {
+    "hash": "36a80263bb507881b42b81b99d584f1243beed18b8b9680b9ec6a028095863d9",
+    "size": 2155
+  },
+  "data\\modular\\b2_ch6\\6.2.json": {
+    "hash": "fbde1a221deb9a6dbbfcdfb6388ad5bb9bb7f4d46faeac2b51dedf832f241ee2",
+    "size": 2095
+  },
+  "data\\modular\\b2_ch6\\6.3.json": {
+    "hash": "62ab788bbfe0b1d156e689f3a518b0a5b0575fda8b4c6c9ce348c9b46c4ff9c6",
+    "size": 2090
+  },
+  "data\\modular\\b2_ch6\\6.4.json": {
+    "hash": "0298fc55c1cc100145634c4c0a95cf161c489cf2e6fd867d0ae0c45685f74d7f",
+    "size": 2161
+  },
+  "data\\modular\\b2_ch6\\6.5.json": {
+    "hash": "fece88039e8b541cdc7fb9e7835b9232daad2b912ae7ea87be3c34406968f10b",
+    "size": 2492
+  },
+  "data\\modular\\b2_ch7\\7.1.json": {
+    "hash": "b58a77c9ca6d69ea60e36762e29086915f2f764272864bf6b1bf6a86d8a318e5",
+    "size": 2463
+  },
+  "data\\modular\\b2_ch7\\7.2.json": {
+    "hash": "2eac979544c3b8510d17228485a939c7ee5522c8454d83950fec3dc9a1b8ef24",
+    "size": 1968
+  },
+  "data\\modular\\b2_ch7\\7.3.json": {
+    "hash": "2500d26f25cb7d255d09d48e69d20c23fc2ae5ff3826cbdd73dd12dbfcd5882b",
+    "size": 1982
+  },
+  "data\\modular\\b2_ch7\\7.4.json": {
+    "hash": "067c74b48132a439ea21e989f6d37106c919037a645dcede4e939965124ff766",
+    "size": 2027
+  },
+  "data\\modular\\b2_ch7\\7.5.json": {
+    "hash": "f72a4d7ccbb78ebf88fed138f84985c9aa31716ec3b6fb91c3d0006adf1458cd",
+    "size": 1845
+  },
+  "data\\modular\\b2_ch7\\7.6.json": {
+    "hash": "cd15a30664f1e6256129edc8b42d2e03b8df97afbab8e4cb667a2174854aa853",
+    "size": 2061
+  },
+  "data\\modular\\b2_ch8\\8.1.json": {
+    "hash": "8b7b0c5e3925c64fed3182017aae90001b6e7ead07caac78df3b1d052fc07e77",
+    "size": 2136
+  },
+  "data\\modular\\b2_ch8\\8.2.json": {
+    "hash": "b3ec1216040b2b7f98b5b3128ab052e144c872ba8f332d3bf3ffd86bef880aed",
+    "size": 2168
+  },
+  "data\\modular\\b2_ch8\\8.3.json": {
+    "hash": "364b8a4bc41bae429db4b49eb9fa20cc9dde928cb55f683dc4485f869e412850",
+    "size": 2033
+  },
+  "data\\modular\\b2_ch8\\8.4.json": {
+    "hash": "680648926d729a9aa83f2f0aca569f129372ce724276583b4e6c7aa508810087",
+    "size": 2139
+  },
+  "data\\modular\\b2_ch8\\8.5.json": {
+    "hash": "54a666f240601d825e2373ee956ba9c067c8d16c97b6ddb0214befb82adb76d7",
+    "size": 2243
+  },
+  "data\\modular\\b2_ch8\\8.6.json": {
+    "hash": "78fd5c4e088ea8dff6046ffbad81071dbec9fb80888d83293ac32110b05b4727",
+    "size": 2606
+  },
+  "data\\modular\\b2_ch9\\9.1.json": {
+    "hash": "d784d56d36836eef87eddfd36356f9e47ae2c4ed5abc756b197289ff1ed2d054",
+    "size": 2041
+  },
+  "data\\modular\\b2_ch9\\9.2.json": {
+    "hash": "e9347946cae4565b32fcdcfcb26d17f672ceee63f3f5a797200da4a238dce002",
+    "size": 2165
+  },
+  "data\\modular\\b2_ch9\\9.3.json": {
+    "hash": "7c4d01df398ac5702bcbf6c71742e04357856634dcf2a8620932f508146ac117",
+    "size": 2139
+  },
+  "data\\modular\\b2_ch9\\9.4.json": {
+    "hash": "0e50a0eca4ac749686de2524cb07e8b36ec03231f599bc26ae942aeb52aa7139",
+    "size": 2234
+  },
+  "data\\modular\\b2_ch9\\9.5.json": {
+    "hash": "801be4c5107f0862ea1a443b6a82b88ea2e4e3846c03e0d0bd7fab3b7917f21e",
+    "size": 2329
+  },
+  "data\\modular\\b2_ch9\\9.6.json": {
+    "hash": "097a53f92cd8b711ad797d87fc8fe744bf0734ebdac2fd8eb64863a4132976f4",
+    "size": 2297
+  },
+  "data\\modular\\b2_ch9\\9.7.json": {
+    "hash": "e4255c8b4d8642a3126c6f8ccbc000c9d44fed8e3282e69d806ea278e172c2bd",
+    "size": 2690
+  },
+  "favicon.ico": {
+    "hash": "c0fc980ed02aa21b094c97380c56e609fb6dbe0ccaf58b32a82971ea7ea1b66b",
+    "size": 8912
+  },
+  "icons\\FRM_Python_科學管控財金風險_實戰篇.jpg": {
+    "hash": "ed3a104e039bc139dd1925d86fd5eef87a913f3ad2026c0bfec1d947f1cf7c7b",
+    "size": 187568
+  },
+  "icons\\icon-128x128.png": {
+    "hash": "b7f4112c7a5579bf7ee52dc56565f6591d1edfba52ea1f46bfa911ec2c07f8ea",
+    "size": 21442
+  },
+  "icons\\icon-144x144.png": {
+    "hash": "93e06886205d4f515adcad01f5100d199f8ab465555ba91d1c076518b4db8dee",
+    "size": 25506
+  },
+  "icons\\icon-152x152.png": {
+    "hash": "2e03b0579c87b85a30e4c86ca3bbacae278f6f818dcd237cc01e9d8e569432c1",
+    "size": 27501
+  },
+  "icons\\icon-192x192.png": {
+    "hash": "99a9a81c9a103ec1cd5f9eec52530e45d38e6809f0dd002ecd5275d8523eaa62",
+    "size": 39537
+  },
+  "icons\\icon-384x384.png": {
+    "hash": "474abbe24093239a738f92001881f38a082e23f604e4b452f509fbd3b2d3aea7",
+    "size": 131643
+  },
+  "icons\\icon-512x512.png": {
+    "hash": "833c44171cce615d16edd651f3b1baa13f2d40a1e1f6d84094a53adb22f68d03",
+    "size": 220690
+  },
+  "icons\\icon-72x72.png": {
+    "hash": "7871b0c8256b24b29daf93d5c1ebcbda4c81a82112745b954e4afb20bb0df631",
+    "size": 10209
+  },
+  "icons\\icon-96x96.png": {
+    "hash": "baa91df5c045cac46fecd8f1104b9616de167a9649639e8bd21f39f346152539",
+    "size": 14669
+  },
+  "index.html": {
+    "hash": "4e3ad53f4cb17e8dfc96f43aec51eebecb2db244f4e64a10f5ccc471a80b87de",
+    "size": 2551
+  },
+  "manifest.webmanifest": {
+    "hash": "56edbc9b9af2f9a6ee87bf82f6e2b8f41e141ce721993536a9d4bfe1a8f334b1",
+    "size": 992
+  },
+  "original.jpg": {
+    "hash": "ed3a104e039bc139dd1925d86fd5eef87a913f3ad2026c0bfec1d947f1cf7c7b",
+    "size": 187568
+  },
+  "sw.js": {
+    "hash": "76de0c066ff1f292048298ab9a2d7fc7fd5f751911637b6163b318dfe22feb7c",
+    "size": 27805
+  },
+  "welcome.jpg": {
+    "hash": "ed3a104e039bc139dd1925d86fd5eef87a913f3ad2026c0bfec1d947f1cf7c7b",
+    "size": 187568
+  },
+  "welcome.md": {
+    "hash": "3ba021b1d7c83daeaeb94e48fcf0ccf9114abf6f58be668661e55d05b50a4d62",
+    "size": 10020
+  },
+  "wheels\\certifi-2026.1.4-py3-none-any.whl": {
+    "hash": "9943707519e4add1115f44c2bc244f782c0249876bf51b6599fee1ffbedd685c",
+    "size": 152900
+  },
+  "wheels\\charset_normalizer-3.4.4-py3-none-any.whl": {
+    "hash": "7a32c560861a02ff789ad905a2fe94e3f840803362c84fecf1851cb4cf3dc37f",
+    "size": 53402
+  },
+  "wheels\\et_xmlfile-2.0.0-py3-none-any.whl": {
+    "hash": "7a91720bc756843502c3b7504c77b8fe44217c85c537d85037f0f536151b2caa",
+    "size": 18059
+  },
+  "wheels\\idna-3.11-py3-none-any.whl": {
+    "hash": "771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea",
+    "size": 71008
+  },
+  "wheels\\numpy_financial-1.0.0-py3-none-any.whl": {
+    "hash": "bae534b357516f12258862d1f0181d911032d0467f215bfcd1c264b4da579047",
+    "size": 14025
+  },
+  "wheels\\openpyxl-3.1.5-py2.py3-none-any.whl": {
+    "hash": "5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2",
+    "size": 250910
+  },
+  "wheels\\pandas_datareader-0.10.0-py3-none-any.whl": {
+    "hash": "0b95ff3635bc3ee1a6073521b557ab0e3c39d219f4a3b720b6b0bc6e8cdb4bb7",
+    "size": 109460
+  },
+  "wheels\\pymoo-0.4.1-py3-none-any.whl": {
+    "hash": "077818e4a298af6cb54d4b283cd1173d4519e46c5f2c2ef6a5ca03775ac1e990",
+    "size": 304022
+  },
+  "wheels\\pyodide_http-0.2.2-py3-none-any.whl": {
+    "hash": "cf006ea593c1643b5badeb4d42ed24a6eebd830276171fa1f82de0777b3fb608",
+    "size": 9796
+  },
+  "wheels\\requests-2.32.5-py3-none-any.whl": {
+    "hash": "2462f94637a34fd532264295e186976db0f5d453d1cdd31473c85a6a161affb6",
+    "size": 64738
+  },
+  "wheels\\seaborn-0.13.2-py3-none-any.whl": {
+    "hash": "636f8336facf092165e27924f223d3c62ca560b1f2bb5dff7ab7fad265361987",
+    "size": 294914
+  },
+  "wheels\\setuptools-82.0.0-py3-none-any.whl": {
+    "hash": "70b18734b607bd1da571d097d236cfcfacaf01de45717d59e6e04b96877532e0",
+    "size": 1003468
+  },
+  "wheels\\urllib3-2.6.3-py3-none-any.whl": {
+    "hash": "bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4",
+    "size": 131584
+  },
+  "_headers": {
+    "hash": "5d93ce2db948c5e364890c337cd414cfc235c2306075849766a6e8402a8f00b8",
+    "size": 205
+  }
+}
