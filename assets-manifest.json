@@ -251,9 +251,9 @@
     "hash": "35173fe06aefe8f8225933a6fad3942edd116f05fb41646d0a950e786ed031b2",
     "size": 23957
   },
-  "assets/index-BE86Bc7H.js": {
-    "hash": "050522a493dc4f87d8a5db804c5335bc3501be1de381947a002af5f30e6969de",
-    "size": 82748
+  "assets/index-cHwuQmCx.js": {
+    "hash": "beeeb0195d397cc708f5fa908cc027171a3e1f4e43fa09601b7326fa336e63ce",
+    "size": 83563
   },
   "assets/vendor-B3CQIlJd.js": {
     "hash": "88cc02de950f2d1bd00ffe93b8a12259ee5a55913402baf2cedced6340fe7adc",
@@ -312,8 +312,8 @@
     "size": 26833
   },
   "data/chapters_b2_ch5.json": {
-    "hash": "c1e32bd0bdcd6f707cf0c639598105e90cb061913195ae279a704ce35f9d7e85",
-    "size": 45039
+    "hash": "de480bdfa032b84e5e18d52fe5610c6155159c91f33156564fc22e2706f1265a",
+    "size": 45036
   },
   "data/chapters_b2_ch6.json": {
     "hash": "5e74c3ed49661360d613448b15194e975be5b8099adb64e7e0ef23ea4e5b0cd4",
@@ -324,12 +324,12 @@
     "size": 27999
   },
   "data/chapters_b2_ch8.json": {
-    "hash": "7926d6dcf1d5fc2828ec1612ef708472af9041d86ffa5eecb16605b3ee68de7a",
-    "size": 15109
+    "hash": "751c11b70a9a1b2a405944c3434a38b090701313f88d67bd2a32c610abcbf2b1",
+    "size": 15125
   },
   "data/chapters_b2_ch9.json": {
-    "hash": "a1b1e80b86e1f07031819729d22bd144f2d0956108d4cddec4ffb4a187856c96",
-    "size": 24098
+    "hash": "21c857a72cbe56d7c907f2fe1f3599b4f8b23483f7ec29b75105b7fcaf9df284",
+    "size": 24150
   },
   "data/chapters_index.json": {
     "hash": "cb226fbb7f6070b1e0bee46f6fdfa684516e03aa0788f4acc4f16554de0029a8",
@@ -752,7 +752,7 @@
     "size": 14669
   },
   "index.html": {
-    "hash": "9bf8d3a6a17f224598a39ee2e971906399132d04c18808f7eae6928ac956033e",
+    "hash": "7dfd38febb43dd778fd82e6b85fa53257a859333ac14dd93f35922d18ec398d9",
     "size": 2450
   },
   "manifest.webmanifest": {
@@ -764,7 +764,7 @@
     "size": 187568
   },
   "sw.js": {
-    "hash": "2180b189fde51a4e6a346a27dd4f59567d54f31a087844f55bbf1e1f264a62bf",
+    "hash": "222b6a2d8a6cee602de30fd414d8dbcf2c983ee93fb347f4d491019a7cf5c347",
     "size": 27882
   },
   "welcome.jpg": {
