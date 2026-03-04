@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: '/pwa_FRM_Book2_python/',
+  base: '/pwa_FRM_Book2/',
   server: {
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
@@ -28,8 +28,8 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'any',
-        scope: '/pwa_FRM_Book2_python/',
-        start_url: '/pwa_FRM_Book2_python/',
+        scope: '/pwa_FRM_Book2/',
+        start_url: '/pwa_FRM_Book2/',
         icons: [
           {
             src: 'icons/icon-72x72.png',
