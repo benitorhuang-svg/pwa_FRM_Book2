@@ -288,8 +288,8 @@
     "size": 20970
   },
   "data/chapters_b2_ch10.json": {
-    "hash": "082750a8fd1e5253916d23d9fc142cea8f41bd8ef2dadd10903fb7cfaaacc747",
-    "size": 19713
+    "hash": "90f13fb8fb19008c4663b32ad7d7f57b23ab2993dbc7bdf383f6138c38896217",
+    "size": 19712
   },
   "data/chapters_b2_ch11.json": {
     "hash": "0193c041acbaf395c653ffb8cc0997c9f997ee3998ebebf61935cac202ad6610",
@@ -764,7 +764,7 @@
     "size": 187568
   },
   "sw.js": {
-    "hash": "4dca8df75ed99c10c83f57223bfb16076da1ae044df39096ece51a00a93e2e89",
+    "hash": "ff2a6c9aea9c0df0f152c16e35cd8f4d1ee3daa12481118f367b4ccbd46bcdcd",
     "size": 27882
   },
   "welcome.jpg": {
