@@ -1,0 +1,77 @@
+.atom-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    font-family: var(--font-ui);
+    white-space: nowrap;
+}
+
+.atom-btn:active {
+    transform: scale(0.96);
+}
+
+.atom-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Variants */
+.atom-btn.primary {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.atom-btn.primary:hover:not(:disabled) {
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    transform: translateY(-1px);
+}
+
+.atom-btn.secondary {
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+    color: var(--text-main);
+}
+
+.atom-btn.secondary:hover:not(:disabled) {
+    background: var(--bg-hover);
+    border-color: var(--accent-color);
+}
+
+.atom-btn.ghost {
+    background: transparent;
+    color: var(--text-secondary);
+}
+
+.atom-btn.ghost:hover:not(:disabled) {
+    background: var(--glass-highlight);
+    color: var(--text-main);
+}
+
+/* Sizes */
+.atom-btn.sm {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+}
+
+.atom-btn.md {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+}
+
+.atom-btn.lg {
+    padding: 14px 28px;
+    font-size: 1rem;
+    border-radius: 16px;
+}
+
+.btn-icon {
+    flex-shrink: 0;
+}

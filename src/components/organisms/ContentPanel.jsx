@@ -1,15 +1,14 @@
 import { useEffect, useMemo, memo, useRef } from 'react'
 import { Marked } from 'marked'
-import renderMathInElement from 'katex/dist/contrib/auto-render'
+import katex from 'katex'
 import DOMPurify from 'dompurify'
 import './ContentPanel.css'
-import './WelcomeScreen.css'
 
 // Create a dedicated Marked instance
 const marked = new Marked()
 
 
-const ContentPanel = memo(({ chapter, bodyContent, onCodeClick, selectedTopicId, output, isRunning, plotImages }) => {
+const ContentPanel = memo(({ chapter, bodyContent, onCodeClick, selectedTopicId, output, isRunning, plotImages, pyodideReady }) => {
   const containerRef = useRef(null)
 
   // Use useMemo to prevent expensive markdown parsing on every re-render (like when resizing)
@@ -287,11 +286,21 @@ const ContentPanel = memo(({ chapter, bodyContent, onCodeClick, selectedTopicId,
       `
       return html
     }
-  }, [chapter, bodyContent])
+  }, [chapter, bodyContent, pyodideReady])
+
+  // 使用 JSON.stringify 來穩定化 bodyContent 的比較
+  const bodyContentKey = useMemo(() => 
+    bodyContent ? JSON.stringify(Object.keys(bodyContent).sort()) : null
+  , [bodyContent])
 
   useEffect(() => {
     const handleCodeLinkClick = (e) => {
       if (e.target.classList.contains('code-link')) {
+        if (!pyodideReady) {
+          e.preventDefault()
+          e.stopPropagation()
+          return
+        }
         const filename = e.target.dataset.filename
         let script = null
 
@@ -310,7 +319,7 @@ const ContentPanel = memo(({ chapter, bodyContent, onCodeClick, selectedTopicId,
 
     document.addEventListener('click', handleCodeLinkClick)
     return () => document.removeEventListener('click', handleCodeLinkClick)
-  }, [chapter, onCodeClick])
+  }, [chapter, onCodeClick, pyodideReady, bodyContentKey])
 
   // Auto-scroll to top when chapter changes
   useEffect(() => {
@@ -319,24 +328,6 @@ const ContentPanel = memo(({ chapter, bodyContent, onCodeClick, selectedTopicId,
       scrollContainer.scrollTop = 0
     }
   }, [chapter])
-
-  // Robust KaTeX rendering using auto-render (Post-processing)
-  useEffect(() => {
-    if (containerRef.current && renderedContent) {
-
-      renderMathInElement(containerRef.current, {
-        delimiters: [
-          { left: '$$', right: '$$', display: true },
-          { left: '$', right: '$', display: false },
-          { left: '\\(', right: '\\)', display: false },
-          { left: '\\[', right: '\\]', display: true }
-        ],
-        throwOnError: false
-      })
-
-    }
-  }, [renderedContent])
-
 
   // Auto-scroll to topic when selectedTopicId changes
   useEffect(() => {
@@ -413,6 +404,13 @@ const ContentPanel = memo(({ chapter, bodyContent, onCodeClick, selectedTopicId,
                 <div className="welcome-content">
                   <h2 className="welcome-title">Python 金融風險管理：<br />數學模型與應用 (實戰篇)</h2>
                   <div className="welcome-slogan">☆★☆★【有如手術刀般精準！利用Python幫你管控財金風險！】★☆★☆</div>
+
+                  {!pyodideReady && (
+                    <div className="py-loading-hint">
+                      <span className="loading-spinner-small"></span>
+                      <span>Python 引擎正在背景載入中...</span>
+                    </div>
+                  )}
 
                   <div className="welcome-text-scroll">
                     <p>在上一本基礎篇的學習完備，能善用Python程式語言及常用的工具套件之後，接下來就是開始對金融風險進行評估了。</p>
