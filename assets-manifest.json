@@ -247,9 +247,9 @@
     "hash": "f01f3e87d9c6a61c0c081ceb577abd864eb00a612f7ac1620dd6915fad2ef5aa",
     "size": 27556
   },
-  "assets/index-7jnMX2tA.js": {
-    "hash": "927a84f18cb2eddb70be40de577556e887d3424ada22e9509fe4996acee43cdd",
-    "size": 83691
+  "assets/index-3FTXT9UI.js": {
+    "hash": "b4ae6ecf9f8714e919acf95583299371c829a84b2a84d89a348e27667bb7487f",
+    "size": 88921
   },
   "assets/index-B5sKPdfz.css": {
     "hash": "35173fe06aefe8f8225933a6fad3942edd116f05fb41646d0a950e786ed031b2",
@@ -312,8 +312,8 @@
     "size": 27079
   },
   "data/chapters_b2_ch5.json": {
-    "hash": "de480bdfa032b84e5e18d52fe5610c6155159c91f33156564fc22e2706f1265a",
-    "size": 45036
+    "hash": "622a02fc31480122aff358c86468090ff9290a7be6674c45ff5b567a424ff46d",
+    "size": 45062
   },
   "data/chapters_b2_ch6.json": {
     "hash": "5e74c3ed49661360d613448b15194e975be5b8099adb64e7e0ef23ea4e5b0cd4",
@@ -615,6 +615,14 @@
     "hash": "38b7d955515a37c2d036f59d45d4fb6b4d38fc3816ebae1875f18455bd30cbbc",
     "size": 2178
   },
+  "data/modular/b2_ch5/5.7.json": {
+    "hash": "fb67a12f174d05bf6c6446f64d08f5789607a5f82f487c501b4a163c5ccd2d05",
+    "size": 2994
+  },
+  "data/modular/b2_ch5/5.8.json": {
+    "hash": "2ac56539f0153e5f0ddf5517ab5dbda6595859766274cb3f4f6f86478502c9f1",
+    "size": 3724
+  },
   "data/modular/b2_ch6/6.1.json": {
     "hash": "36a80263bb507881b42b81b99d584f1243beed18b8b9680b9ec6a028095863d9",
     "size": 2155
@@ -752,7 +760,7 @@
     "size": 14669
   },
   "index.html": {
-    "hash": "654832cc576c0dfe725c3d855c3b48b29b3c1b428566b7fe80d03a693952de5b",
+    "hash": "1b88cc1a74df4b53baca1f7c4ab126ebed76de0c64041029a8e36a36072388ce",
     "size": 1953
   },
   "manifest.webmanifest": {
@@ -764,8 +772,8 @@
     "size": 187568
   },
   "sw.js": {
-    "hash": "ff2a6c9aea9c0df0f152c16e35cd8f4d1ee3daa12481118f367b4ccbd46bcdcd",
-    "size": 27882
+    "hash": "8b8731392f7a93e11eea56a436ccce0620e12ab35fd7f44618fa4b205b41d289",
+    "size": 28052
   },
   "welcome.jpg": {
     "hash": "ed3a104e039bc139dd1925d86fd5eef87a913f3ad2026c0bfec1d947f1cf7c7b",
