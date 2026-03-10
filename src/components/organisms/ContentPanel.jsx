@@ -109,14 +109,15 @@ const ContentPanel = memo(({ chapter, bodyContent, onCodeClick, selectedTopicId,
         mathBlocks.push({ type: 'display', content: inner })
         return ` @@MATH_BLOCK_${idx}@@ `
       })
-      rawMarkdown = rawMarkdown.replace(/\\\[([\s\S]*?)\\\]/g, (match, inner) => {
+      rawMarkdown = rawMarkdown.replace(/\\+\[([\s\S]*?)\\+\]/g, (match, inner) => {
         const idx = mathBlocks.length
         mathBlocks.push({ type: 'display', content: inner })
         return ` @@MATH_BLOCK_${idx}@@ `
       })
 
       // 2. Aligned environments: \begin{aligned} ... \end{aligned}
-      rawMarkdown = rawMarkdown.replace(/\\begin\{aligned\}([\s\S]*?)\\end\{aligned\}/g, (match, inner) => {
+      // Match one or more backslashes before begin/end to handle JSON escaping layers
+      rawMarkdown = rawMarkdown.replace(/\\+begin\{aligned\}([\s\S]*?)\\+end\{aligned\}/g, (match, inner) => {
         const idx = mathBlocks.length
         mathBlocks.push({ type: 'display', content: `\\begin{aligned}${inner}\\end{aligned}` })
         return ` @@MATH_BLOCK_${idx}@@ `
@@ -128,7 +129,7 @@ const ContentPanel = memo(({ chapter, bodyContent, onCodeClick, selectedTopicId,
         mathBlocks.push({ type: 'inline', content: inner })
         return ` @@MATH_BLOCK_${idx}@@ `
       })
-      rawMarkdown = rawMarkdown.replace(/\\\(([\s\S]*?)\\\)/g, (match, inner) => {
+      rawMarkdown = rawMarkdown.replace(/\\+\(([\s\S]*?)\\+\)/g, (match, inner) => {
         const idx = mathBlocks.length
         mathBlocks.push({ type: 'inline', content: inner })
         return ` @@MATH_BLOCK_${idx}@@ `
@@ -153,12 +154,12 @@ const ContentPanel = memo(({ chapter, bodyContent, onCodeClick, selectedTopicId,
           'math', 'annotation', 'semantics', 'mrow', 'msub', 'msup', 'msubsup', 'mover', 'munder', 'munderover',
           'mmultiscripts', 'mprec', 'mnext', 'mtable', 'mtr', 'mtd', 'mfrac', 'msqrt', 'mroot', 'mstyle', 'merror',
           'mpadded', 'mphantom', 'mfenced', 'menclose', 'ms', 'mglyph', 'maligngroup', 'malignmark', 'maction',
-          'svg', 'path', 'use', 'span', 'div', 'g', 'text', 'rect', 'circle', 'line', 'polyline', 'polygon', 'defs', 'marker', 'symbol'
+          'svg', 'path', 'use', 'span', 'div', 'g', 'text', 'rect', 'circle', 'line', 'polyline', 'polygon', 'defs', 'marker', 'symbol', 'linearGradient', 'stop', 'radialGradient', 'clipPath', 'foreignObject'
         ],
         ADD_ATTR: [
           'id', 'target', 'xlink:href', 'class', 'style', 'aria-hidden', 'viewBox', 'd', 'fill', 'stroke',
           'stroke-width', 'data-filename', 'encoding', 'display', 'x', 'y', 'cx', 'cy', 'r', 'width', 'height',
-          'text-anchor', 'font-size', 'font-family', 'font-weight', 'transform', 'marker-end', 'refX', 'refY', 'orient', 'stroke-dasharray', 'fill-opacity'
+          'text-anchor', 'font-size', 'font-family', 'font-weight', 'transform', 'marker-end', 'refX', 'refY', 'orient', 'stroke-dasharray', 'fill-opacity', 'opacity', 'stop-color', 'stop-opacity', 'offset', 'gradientUnits', 'rx', 'ry', 'clip-path'
         ]
       })
 
@@ -289,9 +290,9 @@ const ContentPanel = memo(({ chapter, bodyContent, onCodeClick, selectedTopicId,
   }, [chapter, bodyContent, pyodideReady])
 
   // 使用 JSON.stringify 來穩定化 bodyContent 的比較
-  const bodyContentKey = useMemo(() => 
+  const bodyContentKey = useMemo(() =>
     bodyContent ? JSON.stringify(Object.keys(bodyContent).sort()) : null
-  , [bodyContent])
+    , [bodyContent])
 
   useEffect(() => {
     const handleCodeLinkClick = (e) => {

@@ -41,15 +41,12 @@ export default function useBodyContent(chapter) {
     setBodyLoading(true)
 
     const fetchAll = async () => {
-      const result = {}
-
-      await Promise.all(
+      const resultsArray = await Promise.all(
         refs.map(async (sectionId) => {
           const cacheKey = `${chapterId}/${sectionId}`
 
           if (cacheRef.current[cacheKey] !== undefined) {
-            result[sectionId] = cacheRef.current[cacheKey]
-            return
+            return cacheRef.current[cacheKey]
           }
 
           try {
@@ -59,15 +56,19 @@ export default function useBodyContent(chapter) {
             const data = await res.json()
             const markdown = data.content || ''
             cacheRef.current[cacheKey] = markdown
-            result[sectionId] = markdown
+            return markdown
           } catch (err) {
             console.warn(`[useBodyContent] Failed to load ${chapterId}/${sectionId}:`, err)
-            result[sectionId] = ''
+            return ''
           }
         })
       )
 
       if (!cancelled) {
+        const result = {}
+        refs.forEach((ref, idx) => {
+          result[ref] = resultsArray[idx]
+        })
         setBodyContent(result)
         setBodyLoading(false)
       }
